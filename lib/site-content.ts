@@ -1,9 +1,9 @@
 export const siteName = "OpenStair";
 
 export const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
+  { href: "/", label: "OpenStair" },
+  { href: "/about", label: "OpenStair" },
+  { href: "/contact", label: "OpenStair - Contact Us" },
 ] as const;
 
 export const featureCards = [

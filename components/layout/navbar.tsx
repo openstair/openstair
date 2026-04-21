@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Container } from "@/components/layout/container";
 import { navLinks } from "@/lib/site-content";
 
@@ -7,7 +8,14 @@ export function Navbar() {
     <header className="sticky top-0 z-40 border-b border-white/10 bg-[#070d1b]/70 backdrop-blur-2xl">
       <Container className="flex flex-wrap items-center justify-between gap-3 py-4">
         <Link href="/" className="group inline-flex items-center text-lg font-semibold text-white">
-          <span className="mr-1.5 text-[var(--color-accent)] transition group-hover:text-white">Open</span>
+          <Image
+            src="/favicon.png"
+            alt="OpenStair Logo"
+            width={36}
+            height={36}
+            priority
+          />
+          <span className="mr-0.5 text-[var(--color-accent)] transition group-hover:text-white">Open</span>
           Stair
         </Link>
 

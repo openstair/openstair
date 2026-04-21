@@ -1,9 +1,9 @@
 const fallback = {
   email: "hello@openstair.com",
-  mobile: "+91 98765 43210",
-  whatsapp: "https://wa.me/919876543210",
+  mobile: "+91 87559 64418",
+  whatsapp: "https://wa.me/917818899109",
   linkedin: "https://www.linkedin.com/company/openstair",
-  instagram: "https://www.instagram.com/openstairhq",
+  instagram: "https://www.instagram.com/open.stair",
 };
 
 export type ContactChannel = {
