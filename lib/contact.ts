@@ -1,5 +1,5 @@
 const fallback = {
-  email: "hello@openstair.com",
+  email: "hello@openstair.in",
   mobile: "+91 87559 64418",
   whatsapp: "https://wa.me/917818899109?text=Hi",
   linkedin: "https://www.linkedin.com/company/openstair",

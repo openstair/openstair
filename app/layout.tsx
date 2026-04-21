@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://openstair.com"),
+  metadataBase: new URL("https://openstair.in"),
   title: {
     default: "OpenStair | Clarity for modern teams",
     template: "%s | OpenStair",
