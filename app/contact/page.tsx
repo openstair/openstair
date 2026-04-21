@@ -6,7 +6,7 @@ import { ContactForm } from "@/components/ui/contact-form";
 import { getContactChannels } from "@/lib/contact";
 
 export const metadata: Metadata = {
-  title: "Contact",
+  title: "OpenStair | Contact Us",
   description:
     "Reach OpenStair through email, phone, WhatsApp, LinkedIn, or Instagram and send a message from the contact form.",
 };

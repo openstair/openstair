@@ -3,7 +3,7 @@ import { Section } from "@/components/layout/section";
 import { SiteShell } from "@/components/layout/site-shell";
 
 export const metadata: Metadata = {
-  title: "About",
+  title: "OpenStair | About us",
   description:
     "Learn the mission, vision, and story behind OpenStair and how we help modern teams execute with clarity.",
 };

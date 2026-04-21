@@ -6,7 +6,7 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { featureCards, howItWorks } from "@/lib/site-content";
 
 export const metadata: Metadata = {
-  title: "Home",
+  title: "OpenStair",
   description:
     "OpenStair is the operating layer for fast-moving startup teams that need focus and execution clarity.",
 };
