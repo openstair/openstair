@@ -1,65 +1,105 @@
-import Image from "next/image";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Section } from "@/components/layout/section";
+import { SiteShell } from "@/components/layout/site-shell";
+import { SectionHeading } from "@/components/ui/section-heading";
+import { featureCards, howItWorks } from "@/lib/site-content";
 
-export default function Home() {
+export const metadata: Metadata = {
+  title: "Home",
+  description:
+    "OpenStair is the operating layer for fast-moving startup teams that need focus and execution clarity.",
+};
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <SiteShell>
+      <Section className="relative overflow-hidden pt-18 pb-16 sm:pt-22 md:pt-28 md:pb-24">
+        <div className="soft-pulse absolute top-8 right-[-90px] h-52 w-52 rounded-full bg-cyan-300/15 blur-3xl md:h-72 md:w-72" />
+        <div className="reveal relative max-w-3xl">
+          <p className="inline-flex rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">
+            Built for high-velocity startups
           </p>
+          <h1 className="mt-7 text-4xl font-semibold leading-[1.05] text-white sm:text-5xl md:text-6xl">
+            Turn scattered execution into one clear, compounding workflow.
+          </h1>
+          <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--color-muted)] sm:text-lg">
+            OpenStair gives your team a premium operating surface to plan smarter, collaborate tighter, and ship without momentum loss.
+          </p>
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Link
+              href="/contact"
+              className="btn-primary reveal-delay-1 text-center"
+            >
+              Book a demo
+            </Link>
+            <Link
+              href="/about"
+              className="btn-secondary reveal-delay-2 text-center"
+            >
+              Learn about OpenStair
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </Section>
+
+      <Section className="py-12 md:py-18">
+        <SectionHeading
+          eyebrow="Features"
+          title="Everything your team needs to move in sync"
+          description="A minimal but powerful stack designed to reduce operational drag and help teams execute with confidence."
+        />
+        <div className="mt-10 grid gap-5 sm:grid-cols-2">
+          {featureCards.map((feature) => (
+            <article
+              key={feature.title}
+              className="reveal group rounded-2xl border border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02))] p-6 transition duration-300 hover:-translate-y-1 hover:border-cyan-300/30"
+            >
+              <h3 className="text-xl font-semibold text-white transition duration-300 group-hover:text-cyan-100">
+                {feature.title}
+              </h3>
+              <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">{feature.description}</p>
+            </article>
+          ))}
         </div>
-      </main>
-    </div>
+      </Section>
+
+      <Section className="py-12 md:py-18">
+        <SectionHeading
+          eyebrow="How it works"
+          title="Three simple steps to operational clarity"
+          description="Roll out OpenStair in days, not quarters, and keep your execution model lightweight as you scale."
+        />
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+          {howItWorks.map((item, index) => (
+            <article
+              key={item.step}
+              className="reveal rounded-2xl border border-white/10 bg-[var(--color-surface)] p-6 transition duration-300 hover:border-cyan-300/30"
+            >
+              <p className="text-sm font-semibold text-[var(--color-accent)]">0{index + 1}</p>
+              <h3 className="mt-3 text-xl font-semibold text-white">{item.step}</h3>
+              <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">{item.description}</p>
+            </article>
+          ))}
+        </div>
+      </Section>
+
+      <Section className="py-12 pb-2 md:py-18">
+        <div className="reveal rounded-3xl border border-cyan-300/25 bg-[linear-gradient(135deg,rgba(103,232,249,0.16),rgba(103,232,249,0.06))] p-8 sm:p-10 md:p-12">
+          <h2 className="text-3xl font-semibold leading-tight text-white md:text-4xl">
+            Ready to climb faster with less friction?
+          </h2>
+          <p className="mt-5 max-w-2xl text-base leading-8 text-slate-100/90">
+            OpenStair helps teams reclaim focus, reduce decision lag, and create measurable progress every week.
+          </p>
+          <Link
+            href="/contact"
+            className="btn-secondary mt-7 border-white bg-white text-slate-900 hover:bg-slate-100"
+          >
+            Talk to our team
+          </Link>
+        </div>
+      </Section>
+    </SiteShell>
   );
 }
