@@ -6,13 +6,13 @@ import { navLinks } from "@/lib/site-content";
 export function Navbar() {
   return (
     <header className="sticky top-0 z-40 border-b border-white/10 bg-[#070d1b]/70 backdrop-blur-2xl">
-      <Container className="flex flex-wrap items-center justify-between gap-3 py-4">
+      <Container className="mr-1.5 flex flex-wrap items-center justify-between gap-3 py-4">
         <Link href="/" className="group inline-flex items-center text-lg font-semibold text-white">
           <Image
             src="/favicon.png"
             alt="OpenStair Logo"
-            width={36}
-            height={36}
+            width={24}
+            height={24}
             priority
           />
           <span className="mr-0.5 text-[var(--color-accent)] transition group-hover:text-white">Open</span>
