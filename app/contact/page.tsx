@@ -1,18 +1,18 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Section } from "@/components/layout/section";
 import { SiteShell } from "@/components/layout/site-shell";
 import { ContactForm } from "@/components/ui/contact-form";
-import { getContactChannels } from "@/lib/contact";
+import { ContactIconButton } from "@/components/ui/contact-icon-button";
+import { getContactGroups } from "@/lib/contact";
 
 export const metadata: Metadata = {
-  title: "Contact Us",
+  title: "Contact",
   description:
     "Reach OpenStair through email, phone, WhatsApp, LinkedIn, or Instagram and send a message from the contact form.",
 };
 
 export default function ContactPage() {
-  const channels = getContactChannels();
+  const groups = getContactGroups();
 
   return (
     <SiteShell>
@@ -27,28 +27,27 @@ export default function ContactPage() {
 
       <Section className="grid gap-6 pb-2 md:grid-cols-[1.05fr_1fr] md:items-start">
         <article className="reveal rounded-3xl border border-white/10 bg-[var(--color-card)] p-7 md:p-8">
-          <h2 className="text-xl font-semibold text-white">Direct channels</h2>
-          <ul className="mt-6 space-y-3">
-            {channels.map((channel) => (
-              <li
-                key={channel.label}
-                className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 transition duration-300 hover:border-cyan-300/30 hover:bg-white/[0.05]"
-              >
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-400">
-                  {channel.label}
-                </p>
-                <Link
-                  href={channel.href}
-                  aria-label={`${channel.label}: ${channel.value}`}
-                  className="mt-2 inline-block text-sm leading-6 text-cyan-100 transition duration-300 hover:text-cyan-50"
-                  target={channel.href.startsWith("http") ? "_blank" : undefined}
-                  rel={channel.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                >
-                  {channel.value}
-                </Link>
-              </li>
+          <h2 className="text-xl font-semibold text-white">Direct Contact</h2>
+          <div className="mt-6 space-y-5">
+            {groups.map((group) => (
+              <section key={group.title} aria-label={group.title}>
+                <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-400">
+                  {group.title}
+                </h3>
+                <div className="mt-3 flex flex-wrap gap-2.5">
+                  {group.items.map((item) => (
+                    <ContactIconButton
+                      key={item.id}
+                      id={item.id}
+                      label={item.label}
+                      value={item.value}
+                      href={item.href}
+                    />
+                  ))}
+                </div>
+              </section>
             ))}
-          </ul>
+          </div>
         </article>
 
         <article className="reveal reveal-delay-1 rounded-3xl border border-white/10 bg-[var(--color-card-2)] p-7 md:p-8">

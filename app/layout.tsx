@@ -7,6 +7,9 @@ export const metadata: Metadata = {
     default: "OpenStair | Clarity for modern teams",
     template: "%s | OpenStair",
   },
+  icons: {
+    icon: '/favicon.ico',
+  },
   description:
     "OpenStair helps startups align teams, remove friction, and execute with confidence.",
   openGraph: {

@@ -9,7 +9,7 @@ export function Navbar() {
       <Container className="flex flex-wrap items-center justify-between gap-3 py-4">
         <Link href="/" className="group inline-flex items-center text-lg font-semibold text-white">
           <Image
-            src="/favicon.png"
+            src="/logo.png"
             alt="OpenStair Logo"
             width={24}
             height={24}
