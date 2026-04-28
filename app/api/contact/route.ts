@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 
 const RESEND_API_URL = "https://api.resend.com/emails";
-const FROM_EMAIL = "noreply@openstair.in";
-const TO_EMAIL = "openstair.technologies@gmail.com";
+const FROM_EMAIL = "OpenStair <noreply@openstair.in>";
+const TO_EMAIL = "hello@openstair.in";
+const BCC_EMAIL = "openstair.technologies@gmail.com";
 
 export async function POST(request: Request) {
   try {
@@ -55,7 +56,8 @@ export async function POST(request: Request) {
         from: FROM_EMAIL,
         to: [TO_EMAIL],
         reply_to: email,
-        subject: `New contact message from ${name}`,
+        bcc: [BCC_EMAIL],
+        subject: `Query from ${name}`,
         text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
         attachments,
       }),
