@@ -1,7 +1,7 @@
 const fallback = {
   email: "hello@openstair.in",
-  mobile: "+91 78188 99109",
-  whatsapp: "https://wa.me/917818899109?text=Hi",
+  call: "+91 78188 99109",
+  whatsapp: "https://wa.me/917818899109?text=Hi&lang=en",
   linkedin: "https://www.linkedin.com/company/openstair",
   github: "https://github.com/openstair",
   pubdev: "https://pub.dev/publishers/openstair.in/packages",
@@ -24,7 +24,7 @@ export type ContactGroup = {
 
 export function getContactGroups(): ContactGroup[] {
   const email = process.env.NEXT_PUBLIC_OPENSTAIR_EMAIL ?? fallback.email;
-  const call = process.env.NEXT_PUBLIC_OPENSTAIR_CALL ?? fallback.mobile;
+  const call = process.env.NEXT_PUBLIC_OPENSTAIR_CALL ?? fallback.call;
   const whatsapp = process.env.NEXT_PUBLIC_OPENSTAIR_WHATSAPP ?? fallback.whatsapp;
   const linkedin = process.env.NEXT_PUBLIC_OPENSTAIR_LINKEDIN ?? fallback.linkedin;
   const github = process.env.NEXT_PUBLIC_OPENSTAIR_GITHUB ?? fallback.github;

@@ -34,17 +34,33 @@ export default function ContactPage() {
                 <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-400">
                   {group.title}
                 </h3>
-                <div className="mt-3 flex flex-wrap gap-2.5">
-                  {group.items.map((item) => (
-                    <ContactIconButton
-                      key={item.id}
-                      id={item.id}
-                      label={item.label}
-                      value={item.value}
-                      href={item.href}
-                    />
-                  ))}
-                </div>
+                {group.title === "Info" ? (
+                  <div className="mt-3 space-y-2">
+                    {group.items.map((item) => (
+                      <div
+                        key={item.id}
+                        className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5"
+                      >
+                        <p className="text-xs uppercase tracking-[0.12em] text-slate-400">
+                          {item.label}
+                        </p>
+                        <p className="mt-1 text-sm text-slate-200">{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-3 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+                    {group.items.map((item) => (
+                      <ContactIconButton
+                        key={item.id}
+                        id={item.id}
+                        label={item.label}
+                        value={item.value}
+                        href={item.href}
+                      />
+                    ))}
+                  </div>
+                )}
               </section>
             ))}
           </div>

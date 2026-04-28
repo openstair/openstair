@@ -8,7 +8,7 @@ type ContactIconButtonProps = {
 };
 
 function ContactIcon({ id }: { id: string }) {
-  const className = "h-5 w-5";
+  const className = "h-6 w-6";
 
   switch (id) {
     case "email":
@@ -20,9 +20,8 @@ function ContactIcon({ id }: { id: string }) {
       );
     case "whatsapp":
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
-          <path d="M20 11.5A8.5 8.5 0 0 1 7.2 18.8L4 20l1.2-3.2A8.5 8.5 0 1 1 20 11.5Z" />
-          <path d="M9.3 9.3c.2-.3.4-.3.6-.3h.5c.2 0 .4 0 .5.3l.6 1.4c.1.2.1.4 0 .6l-.5.7c-.1.2-.1.4 0 .6.4.8 1 1.4 1.8 1.8.2.1.4.1.6 0l.7-.5c.2-.1.4-.1.6 0l1.4.6c.3.1.3.3.3.5v.5c0 .2 0 .4-.3.6-.5.4-1.2.5-1.9.3a7 7 0 0 1-4.5-4.5c-.2-.7-.1-1.4.3-1.9Z" />
+        <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+          <path d="M20.1 11.9A8.1 8.1 0 0 1 8 18.9L4 20l1.1-3.8a8.1 8.1 0 1 1 15-4.3Zm-8.1-6.7a6.7 6.7 0 0 0-5.8 10l.2.3-.7 2.4 2.4-.6.2.1a6.7 6.7 0 1 0 3.7-12.2Zm3.9 8.4c-.2-.1-1.2-.6-1.4-.6-.2-.1-.3-.1-.5.1l-.4.5c-.1.2-.3.2-.5.1-.9-.4-1.6-1-2.1-1.9-.1-.2 0-.3.1-.5l.4-.4c.1-.1.2-.3.3-.4.1-.1.1-.3 0-.4l-.6-1.4c-.1-.2-.2-.3-.4-.3h-.4c-.2 0-.4.1-.5.3-.4.4-.6.9-.6 1.4 0 .8.4 1.6.9 2.2 1.1 1.4 2.5 2.5 4.2 3 .6.2 1.3.2 1.9 0 .4-.2.8-.5.9-.9.1-.2.1-.5 0-.6 0-.1-.2-.2-.4-.3Z" />
         </svg>
       );
     case "call":
@@ -95,7 +94,7 @@ function ContactIcon({ id }: { id: string }) {
 
 export function ContactIconButton({ id, label, value, href }: ContactIconButtonProps) {
   const className =
-    "group relative inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/12 bg-white/[0.04] text-slate-200 transition duration-300 hover:-translate-y-0.5 hover:border-cyan-300/35 hover:bg-white/[0.08] hover:text-cyan-100";
+    "group relative inline-flex h-12 w-12 items-center justify-center rounded-xl border border-white/12 bg-white/[0.04] text-slate-200 transition duration-300 hover:-translate-y-0.5 hover:border-cyan-300/35 hover:bg-white/[0.08] hover:text-cyan-100";
   const title = `${label}: ${value}`;
 
   if (!href) {
