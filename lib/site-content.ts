@@ -1,45 +1,64 @@
-export const siteName = "OpenStair";
+export const siteName = "OpenStair Technologies";
 
 export const navLinks = [
   { href: "/", label: "Home" },
+  { href: "/services", label: "Services" },
+  { href: "https://apps.openstair.in", label: "Apps" },
+  { href: "/open-source", label: "Open Source" },
+  { href: "/blog", label: "Blog" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ] as const;
 
 export const featureCards = [
   {
-    title: "Unified Execution Layer",
+    title: "Flutter App Development",
     description:
-      "Connect product, ops, and engineering in one living flow so teams stop losing context across tools.",
+      "Cross-platform mobile apps with smooth UI, maintainable architecture, and production-ready release workflows.",
   },
   {
-    title: "Signal-First Dashboards",
+    title: "Android App Development",
     description:
-      "Prioritize what matters with sharp, real-time visibility into blockers, momentum, and customer impact.",
+      "Native Android apps built for performance, reliability, Play Store readiness, and long-term scalability.",
   },
   {
-    title: "Automation Without Fragility",
+    title: "Web Development",
     description:
-      "Ship reliable workflows with guardrails built in, so your team can move fast without cleanup cycles.",
+      "Responsive websites and modern web applications built with clean interfaces, strong SEO, and fast loading.",
   },
   {
-    title: "Collaborative Decision Trails",
+    title: "Backend Development",
     description:
-      "Keep rationale, approvals, and outcomes linked to every initiative for faster alignment and accountability.",
+      "Secure APIs, database architecture, integrations, and backend systems that support real product growth.",
   },
 ] as const;
 
 export const howItWorks = [
   {
-    step: "Connect",
-    description: "Bring your projects, docs, and delivery signals into one structured operating surface.",
+    step: "Discover",
+    description: "Clarify product goals, users, technical constraints, and the cleanest delivery path.",
   },
   {
-    step: "Prioritize",
-    description: "Use clear focus lanes to decide what moves the business forward right now.",
+    step: "Engineer",
+    description: "Design, build, integrate, and test the application with a scalable codebase foundation.",
   },
   {
-    step: "Execute",
-    description: "Run work with shared context, predictable handoffs, and measurable outcomes.",
+    step: "Launch",
+    description: "Prepare production deployment, app store release, performance checks, and next-step support.",
   },
+] as const;
+
+export const technologies = [
+  "Flutter",
+  "Dart",
+  "Android",
+  "Kotlin",
+  "Next.js",
+  "React",
+  "TypeScript",
+  "Spring Boot",
+  "REST APIs",
+  "PostgreSQL",
+  "Firebase",
+  "Vercel",
 ] as const;

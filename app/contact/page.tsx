@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
 import { Section } from "@/components/layout/section";
 import { SiteShell } from "@/components/layout/site-shell";
 import { ContactForm } from "@/components/ui/contact-form";
 import { ContactIconButton } from "@/components/ui/contact-icon-button";
 import { getContactGroups } from "@/lib/contact";
+import { createSeoMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Contact",
+export const metadata = createSeoMetadata({
+  title: "Contact OpenStair Technologies",
   description:
-    "Reach OpenStair through email, phone, WhatsApp, LinkedIn, or Instagram and send a message from the contact form.",
-};
+    "Contact OpenStair Technologies for Flutter development, Android app development, web development, backend development, and full stack software projects.",
+  path: "/contact",
+});
 
 export default function ContactPage() {
   const groups = getContactGroups();
@@ -18,10 +19,10 @@ export default function ContactPage() {
     <SiteShell>
       <Section className="pt-18 pb-12 sm:pt-22 md:pt-28 md:pb-16">
         <h1 className="reveal text-4xl font-semibold leading-tight text-white sm:text-5xl md:text-6xl">
-          Let&apos;s build better momentum together.
+          Let&apos;s build your next software product.
         </h1>
         <p className="reveal reveal-delay-1 mt-6 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
-          We usually reply within one business day. Reach out on your preferred channel or send us a quick message.
+          Share your mobile, web, backend, or full stack development requirements. We usually reply within one business day.
         </p>
       </Section>
 
@@ -69,7 +70,7 @@ export default function ContactPage() {
         <article className="reveal reveal-delay-1 rounded-3xl border border-white/10 bg-[var(--color-card-2)] p-7 md:p-8">
           <h2 className="text-xl font-semibold text-white">Send a message</h2>
           <p className="mt-3 text-sm leading-7 text-slate-300">
-            Share your use case and team size so we can route your request faster.
+            Share your project goal, target platforms, and timeline so we can route your request faster.
           </p>
           <div className="mt-6">
             <ContactForm />

@@ -6,7 +6,7 @@ const fallback = {
   github: "https://github.com/openstair",
   pubdev: "https://pub.dev/publishers/openstair.in/packages",
   instagram: "https://www.instagram.com/open.stair",
-  facebook: "https://www.facebook.com/openstairtech",
+  facebook: "https://www.facebook.com/openstair1",
   youtube: "https://www.youtube.com/@open.stair-1",
   location: "India",
   responseTime: "Within 24 hours on business days",

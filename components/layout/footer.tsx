@@ -9,7 +9,7 @@ export function Footer() {
         <div className="space-y-1.5">
           <p className="text-base font-semibold text-white">{siteName}</p>
           <p className="text-sm text-[var(--color-muted)]">
-            Build momentum with clarity, speed, and confidence.
+            Flutter, Android, web, backend, and full stack development.
           </p>
         </div>
         <nav aria-label="Footer" className="flex flex-wrap gap-5 text-sm text-slate-200">
