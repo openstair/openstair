@@ -26,48 +26,41 @@ export default function ContactPage() {
         </p>
       </Section>
 
-      <Section className="grid gap-6 pb-2 md:grid-cols-[1.05fr_1fr] md:items-start">
-        <article className="reveal rounded-3xl border border-white/10 bg-[var(--color-card)] p-7 md:p-8">
-          <h2 className="text-xl font-semibold text-white">Direct Contact</h2>
-          <div className="mt-6 space-y-5">
+      <Section className="grid gap-6 pb-2 lg:grid-cols-[0.95fr_1.05fr] lg:items-start">
+        <article className="reveal relative overflow-hidden rounded-3xl border border-white/10 bg-[linear-gradient(180deg,rgba(16,25,45,0.96),rgba(11,18,34,0.92))] p-6 shadow-[0_24px_70px_rgba(0,0,0,0.18)] md:p-8">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-cyan-300/10 blur-3xl" />
+          <div className="relative">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-accent)]">
+              Contact Channels
+            </p>
+            <h2 className="mt-3 text-2xl font-semibold text-white">Direct Contact</h2>
+            <p className="mt-3 text-sm leading-7 text-slate-300">
+              Reach us through the channel that works best for your Flutter, Android, web, backend, or full stack project.
+            </p>
+          </div>
+          <div className="relative mt-7 space-y-7">
             {groups.map((group) => (
               <section key={group.title} aria-label={group.title}>
                 <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-slate-400">
                   {group.title}
                 </h3>
-                {group.title === "Info" ? (
-                  <div className="mt-3 space-y-2">
-                    {group.items.map((item) => (
-                      <div
-                        key={item.id}
-                        className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5"
-                      >
-                        <p className="text-xs uppercase tracking-[0.12em] text-slate-400">
-                          {item.label}
-                        </p>
-                        <p className="mt-1 text-sm text-slate-200">{item.value}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="mt-3 flex flex-wrap items-center justify-center gap-3 sm:justify-start">
-                    {group.items.map((item) => (
-                      <ContactIconButton
-                        key={item.id}
-                        id={item.id}
-                        label={item.label}
-                        value={item.value}
-                        href={item.href}
-                      />
-                    ))}
-                  </div>
-                )}
+                <div className="mt-3 grid gap-3">
+                  {group.items.map((item) => (
+                    <ContactIconButton
+                      key={item.id}
+                      id={item.id}
+                      label={item.label}
+                      value={item.value}
+                      href={item.href}
+                    />
+                  ))}
+                </div>
               </section>
             ))}
           </div>
         </article>
 
-        <article className="reveal reveal-delay-1 rounded-3xl border border-white/10 bg-[var(--color-card-2)] p-7 md:p-8">
+        <article className="reveal reveal-delay-1 rounded-3xl border border-white/10 bg-[linear-gradient(180deg,rgba(14,23,41,0.96),rgba(9,15,28,0.92))] p-6 shadow-[0_24px_70px_rgba(0,0,0,0.16)] md:p-8">
           <h2 className="text-xl font-semibold text-white">Send a message</h2>
           <p className="mt-3 text-sm leading-7 text-slate-300">
             Share your project goal, target platforms, and timeline so we can route your request faster.

@@ -2,12 +2,52 @@ export const siteName = "OpenStair Technologies";
 
 export const navLinks = [
   { href: "/", label: "Home" },
+  {
+    href: "/services",
+    label: "Services",
+    match: [
+      "/services",
+      "/flutter-development",
+      "/android-development",
+      "/web-development",
+      "/backend-development",
+    ],
+  },
+  { href: "https://apps.openstair.in", label: "Apps", external: true },
+  { href: "/open-source", label: "Open Source" },
+  { href: "/blog", label: "Blog", match: ["/blog"] },
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+] as const;
+
+export const quickLinks = [
+  { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
-  { href: "https://apps.openstair.in", label: "Apps" },
   { href: "/open-source", label: "Open Source" },
   { href: "/blog", label: "Blog" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
+] as const;
+
+export const serviceLinks = [
+  { href: "/flutter-development", label: "Flutter Development" },
+  { href: "/android-development", label: "Android Development" },
+  { href: "/web-development", label: "Web Development" },
+  { href: "/backend-development", label: "Backend Development" },
+] as const;
+
+export const platformLinks = [
+  { href: "https://github.com/openstair", label: "GitHub", icon: "github" },
+  {
+    href: "https://play.google.com/store/apps/dev?id=8492821411434576790",
+    label: "Play Store",
+    icon: "play",
+  },
+  { href: "https://www.instagram.com/open.stair", label: "Instagram", icon: "instagram" },
+  { href: "https://www.facebook.com/openstair1", label: "Facebook", icon: "facebook" },
+  { href: "https://www.youtube.com/@open.stair-1", label: "YouTube", icon: "youtube" },
+  { href: "https://www.linkedin.com/company/openstair", label: "LinkedIn", icon: "linkedin" },
+  { href: "https://pub.dev/publishers/openstair.in", label: "pub.dev", icon: "pubdev" },
 ] as const;
 
 export const featureCards = [

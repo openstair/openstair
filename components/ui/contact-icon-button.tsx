@@ -7,101 +7,96 @@ type ContactIconButtonProps = {
   href?: string;
 };
 
-function ContactIcon({ id }: { id: string }) {
-  const className = "h-6 w-6";
+const iconClassName = "h-5 w-5";
+const strokeProps = {
+  fill: "none",
+  stroke: "currentColor",
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+  strokeWidth: "1.85",
+};
 
+function ContactIcon({ id }: { id: string }) {
   switch (id) {
     case "email":
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
-          <rect x="3.5" y="5" width="17" height="14" rx="2.5" />
-          <path d="m4.5 7 7.5 6 7.5-6" />
+        <svg viewBox="0 0 24 24" className={iconClassName} aria-hidden="true">
+          <rect x="4" y="5.75" width="16" height="12.5" rx="3" {...strokeProps} />
+          <path d="m5.25 8 6.75 5.15L18.75 8" {...strokeProps} />
         </svg>
       );
     case "whatsapp":
       return (
-        <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-          <path d="M20.1 11.9A8.1 8.1 0 0 1 8 18.9L4 20l1.1-3.8a8.1 8.1 0 1 1 15-4.3Zm-8.1-6.7a6.7 6.7 0 0 0-5.8 10l.2.3-.7 2.4 2.4-.6.2.1a6.7 6.7 0 1 0 3.7-12.2Zm3.9 8.4c-.2-.1-1.2-.6-1.4-.6-.2-.1-.3-.1-.5.1l-.4.5c-.1.2-.3.2-.5.1-.9-.4-1.6-1-2.1-1.9-.1-.2 0-.3.1-.5l.4-.4c.1-.1.2-.3.3-.4.1-.1.1-.3 0-.4l-.6-1.4c-.1-.2-.2-.3-.4-.3h-.4c-.2 0-.4.1-.5.3-.4.4-.6.9-.6 1.4 0 .8.4 1.6.9 2.2 1.1 1.4 2.5 2.5 4.2 3 .6.2 1.3.2 1.9 0 .4-.2.8-.5.9-.9.1-.2.1-.5 0-.6 0-.1-.2-.2-.4-.3Z" />
+        <svg viewBox="0 0 24 24" className={iconClassName} aria-hidden="true">
+          <path
+            d="M5.35 18.85 6.3 15.4a7.4 7.4 0 1 1 2.9 2.75l-3.85.7Z"
+            {...strokeProps}
+          />
+          <path
+            d="M9.15 9.05c.18-.4.34-.52.64-.52h.48c.18 0 .34.12.43.32l.58 1.36c.08.2.04.42-.1.58l-.42.48c-.13.15-.15.34-.05.52.43.78 1.06 1.4 1.88 1.84.18.1.38.07.52-.08l.5-.52c.15-.15.38-.2.58-.1l1.42.66c.2.1.32.3.3.52l-.06.48c-.04.34-.22.55-.58.72-.5.24-1.18.26-1.9.04-1.86-.58-3.52-2.18-4.18-4.02-.25-.7-.25-1.36-.04-1.84Z"
+            {...strokeProps}
+          />
         </svg>
       );
     case "call":
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
-          <path d="M6.8 4.5h2.4c.4 0 .7.2.8.6l.8 3a1 1 0 0 1-.3 1l-1.2 1a13 13 0 0 0 4.8 4.8l1-1.2a1 1 0 0 1 1-.3l3 .8c.4.1.6.4.6.8v2.4c0 .5-.4 1-.9 1A15.6 15.6 0 0 1 5.8 5.4c0-.5.5-.9 1-.9Z" />
-        </svg>
-      );
-    case "linkedin":
-      return (
-        <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-          <path d="M6.7 8.5H3.9v11h2.8v-11Zm.2-3.4a1.7 1.7 0 1 0-3.4 0 1.7 1.7 0 0 0 3.4 0ZM20.5 13.2c0-3.2-1.7-4.7-4-4.7-1.8 0-2.6 1-3 1.7v-1.5h-2.8v11h2.8v-6.1c0-1.6.3-3.1 2.2-3.1 1.8 0 1.8 1.7 1.8 3.2v6h2.8v-6.5Z" />
-        </svg>
-      );
-    case "github":
-      return (
-        <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-          <path d="M12 .7a11.3 11.3 0 0 0-3.6 22c.6 0 .8-.3.8-.6v-2.2c-3.3.7-4-1.6-4-1.6-.5-1.3-1.2-1.6-1.2-1.6-1-.7 0-.7 0-.7 1 .1 1.7 1.1 1.7 1.1 1 1.7 2.6 1.2 3.2 1 .1-.7.4-1.2.7-1.5-2.7-.3-5.5-1.3-5.5-6a4.7 4.7 0 0 1 1.2-3.2c-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.2 11.2 0 0 1 6 0C17 4 18 4.3 18 4.3c.6 1.6.2 2.8.1 3.1a4.7 4.7 0 0 1 1.2 3.2c0 4.7-2.8 5.7-5.5 6 .4.3.8 1 .8 2.1v3.1c0 .3.2.6.8.6A11.3 11.3 0 0 0 12 .7Z" />
-        </svg>
-      );
-    case "pubdev":
-      return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
-          <path d="M12 3.5 4.5 7.8v8.4L12 20.5l7.5-4.3V7.8L12 3.5Z" />
-          <path d="M4.5 7.8 12 12l7.5-4.2M12 12v8.5" />
-        </svg>
-      );
-    case "instagram":
-      return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
-          <rect x="3.5" y="3.5" width="17" height="17" rx="4" />
-          <circle cx="12" cy="12" r="4" />
-          <circle cx="17.3" cy="6.7" r="1" fill="currentColor" stroke="none" />
-        </svg>
-      );
-    case "facebook":
-      return (
-        <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-          <path d="M13.5 21v-7.7h2.6l.4-3h-3V8.4c0-.9.3-1.6 1.6-1.6h1.5V4.1c-.3 0-1.2-.1-2.3-.1-2.2 0-3.8 1.4-3.8 4v2.3H8v3h2.5V21h3Z" />
-        </svg>
-      );
-    case "youtube":
-      return (
-        <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-          <path d="M21.6 8.3a2.9 2.9 0 0 0-2-2c-1.8-.5-7.6-.5-7.6-.5s-5.8 0-7.6.5a2.9 2.9 0 0 0-2 2C2 10.1 2 12 2 12s0 1.9.4 3.7a2.9 2.9 0 0 0 2 2c1.8.5 7.6.5 7.6.5s5.8 0 7.6-.5a2.9 2.9 0 0 0 2-2c.4-1.8.4-3.7.4-3.7s0-1.9-.4-3.7Zm-11.5 6v-4.6L14.3 12l-4.2 2.3Z" />
+        <svg viewBox="0 0 24 24" className={iconClassName} aria-hidden="true">
+          <path
+            d="M7.15 4.9h1.98c.5 0 .92.34 1.04.82l.5 2.05c.1.42-.06.86-.4 1.12l-1.05.8a11.35 11.35 0 0 0 5.08 5.08l.8-1.05c.26-.34.7-.5 1.12-.4l2.05.5c.48.12.82.54.82 1.04v1.98c0 .66-.54 1.2-1.2 1.16A13.1 13.1 0 0 1 6 6.1c-.04-.66.5-1.2 1.15-1.2Z"
+            {...strokeProps}
+          />
         </svg>
       );
     case "location":
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
-          <path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10Z" />
-          <circle cx="12" cy="11" r="2.3" />
+        <svg viewBox="0 0 24 24" className={iconClassName} aria-hidden="true">
+          <path d="M12 21s6.25-5.4 6.25-10.25a6.25 6.25 0 0 0-12.5 0C5.75 15.6 12 21 12 21Z" {...strokeProps} />
+          <circle cx="12" cy="10.75" r="2.15" {...strokeProps} />
         </svg>
       );
     case "responseTime":
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
-          <circle cx="12" cy="12" r="8.5" />
-          <path d="M12 7.8v4.7l3 1.8" />
+        <svg viewBox="0 0 24 24" className={iconClassName} aria-hidden="true">
+          <circle cx="12" cy="12" r="8.25" {...strokeProps} />
+          <path d="M12 7.85v4.55l2.85 1.7" {...strokeProps} />
         </svg>
       );
     default:
       return (
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
-          <circle cx="12" cy="12" r="8.5" />
+        <svg viewBox="0 0 24 24" className={iconClassName} aria-hidden="true">
+          <circle cx="12" cy="12" r="8.25" {...strokeProps} />
         </svg>
       );
   }
 }
 
+function Content({ id, label, value }: Omit<ContactIconButtonProps, "href">) {
+  return (
+    <>
+      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-cyan-300/18 bg-cyan-300/8 text-cyan-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition duration-300 group-hover:border-cyan-200/40 group-hover:bg-cyan-300/14 group-hover:text-white">
+        <ContactIcon id={id} />
+      </span>
+      <span className="min-w-0">
+        <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-slate-400 transition duration-300 group-hover:text-cyan-100/90">
+          {label}
+        </span>
+        <span className="mt-1 block truncate text-sm font-semibold text-slate-100">
+          {value}
+        </span>
+      </span>
+    </>
+  );
+}
+
 export function ContactIconButton({ id, label, value, href }: ContactIconButtonProps) {
   const className =
-    "group relative inline-flex h-12 w-12 items-center justify-center rounded-xl border border-white/12 bg-white/[0.04] text-slate-200 transition duration-300 hover:-translate-y-0.5 hover:border-cyan-300/35 hover:bg-white/[0.08] hover:text-cyan-100";
+    "group relative flex min-h-16 w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.035] px-3.5 py-3 text-left transition duration-300 hover:-translate-y-0.5 hover:border-cyan-300/32 hover:bg-white/[0.065] hover:shadow-[0_18px_42px_rgba(8,145,178,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200";
   const title = `${label}: ${value}`;
 
   if (!href) {
     return (
       <div className={className} aria-label={title} title={title} role="img">
-        <ContactIcon id={id} />
-        <span className="sr-only">{title}</span>
+        <Content id={id} label={label} value={value} />
       </div>
     );
   }
@@ -117,8 +112,7 @@ export function ContactIconButton({ id, label, value, href }: ContactIconButtonP
       target={isExternal ? "_blank" : undefined}
       rel={isExternal ? "noopener noreferrer" : undefined}
     >
-      <ContactIcon id={id} />
-      <span className="sr-only">{title}</span>
+      <Content id={id} label={label} value={value} />
     </Link>
   );
 }

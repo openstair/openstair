@@ -64,7 +64,8 @@ export const organizationJsonLd = {
     "https://www.instagram.com/open.stair",
     "https://www.facebook.com/openstair1",
     "https://www.youtube.com/@open.stair-1",
-    "https://play.google.com/store/apps/dev?id=OpenStair",
+    "https://play.google.com/store/apps/dev?id=8492821411434576790",
+    "https://www.linkedin.com/company/openstair"
   ],
 };
 
