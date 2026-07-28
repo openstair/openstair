@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { getKnowledgeService } from "@/features/knowledge/application/knowledge-service";
 import { blogPosts } from "@/lib/blog";
 import { siteUrl } from "@/lib/seo";
 
@@ -15,7 +16,7 @@ const staticRoutes = [
   "/blog",
 ] as const;
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date("2026-05-08");
   const staticEntries: MetadataRoute.Sitemap = staticRoutes.map((route) => ({
     url: `${siteUrl}${route}`,
@@ -29,6 +30,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly",
     priority: 0.7,
   }));
+  const docsEntries: MetadataRoute.Sitemap = (
+    await getKnowledgeService().listPublicDocuments()
+  ).map((document) => ({
+    url: `${siteUrl}${document.slug ? `/docs/${document.slug}` : "/docs"}`,
+    lastModified: new Date(document.metadata.updatedAt),
+    changeFrequency: "monthly" as const,
+    priority: document.slug === "" ? 0.8 : 0.6,
+  }));
 
-  return [...staticEntries, ...blogEntries];
+  return [...staticEntries, ...blogEntries, ...docsEntries];
 }

@@ -5,6 +5,7 @@ import {
   siteUrl,
   websiteJsonLd,
 } from "@/lib/seo";
+import { AdsenseProvider } from "@/features/advertising/adsense/adsense-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -66,7 +67,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/favicon.ico" type="image/x-icon" />"
+        <link rel="icon" href="/favicon.ico" type="image/x-icon" />
       </head>
       <body className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] antialiased">
         <script
@@ -82,6 +83,7 @@ export default function RootLayout({
           }}
         />
         {children}
+        <AdsenseProvider />
       </body>
     </html>
   );
