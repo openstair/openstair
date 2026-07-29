@@ -14,22 +14,22 @@ export function RelatedDocuments({ documents }: RelatedDocumentsProps) {
   }
 
   return (
-    <section className="mt-10 border-t border-white/10 pt-6">
-      <h2 className="text-2xl font-semibold text-white">Related Documents</h2>
+    <section className="mt-10 border-t border-slate-200 pt-6">
+      <h2 className="text-2xl font-semibold text-[var(--color-ink)]">Related Documents</h2>
       <div className="mt-5 grid gap-4 md:grid-cols-2">
         {documents.map((document) => (
           <Link
             key={document.slug}
             href={document.slug ? `/docs/${document.slug}` : "/docs"}
-            className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-cyan-300/35 hover:bg-white/[0.05]"
+            className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-cyan-500/35 hover:bg-white"
           >
             <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
               {formatReason(document.reason)}
             </span>
-            <h3 className="mt-2 text-lg font-semibold text-white">
+            <h3 className="mt-2 text-lg font-semibold text-[var(--color-ink)]">
               {document.title}
             </h3>
-            <p className="mt-3 text-sm leading-7 text-slate-300">
+            <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
               {document.description}
             </p>
           </Link>
@@ -49,17 +49,17 @@ export function UsedInAssets({ assets }: UsedInAssetsProps) {
   }
 
   return (
-    <section className="mt-10 border-t border-white/10 pt-6">
-      <h2 className="text-2xl font-semibold text-white">Used In</h2>
+    <section className="mt-10 border-t border-slate-200 pt-6">
+      <h2 className="text-2xl font-semibold text-[var(--color-ink)]">Used In</h2>
       <div className="mt-5 grid gap-4 md:grid-cols-2">
         {assets.map((asset) => (
           <Link
             key={asset.id}
             href={`/docs/assets/${asset.id}`}
-            className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-cyan-300/35 hover:bg-white/[0.05]"
+            className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-cyan-500/35 hover:bg-white"
           >
-            <h3 className="text-lg font-semibold text-white">{asset.title}</h3>
-            <p className="mt-3 text-sm leading-7 text-slate-300">
+            <h3 className="text-lg font-semibold text-[var(--color-ink)]">{asset.title}</h3>
+            <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
               {asset.description}
             </p>
           </Link>

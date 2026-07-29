@@ -12,10 +12,10 @@ export function DocumentList({ documents }: DocumentListProps) {
         <Link
           key={document.slug}
           href={document.slug ? `/docs/${document.slug}` : "/docs"}
-          className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-cyan-300/35 hover:bg-white/[0.05]"
+          className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-cyan-500/35 hover:bg-white"
         >
-          <h2 className="text-xl font-semibold text-white">{document.title}</h2>
-          <p className="mt-3 text-sm leading-7 text-slate-300">
+          <h2 className="text-xl font-semibold text-[var(--color-ink)]">{document.title}</h2>
+          <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
             {document.description}
           </p>
           <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">

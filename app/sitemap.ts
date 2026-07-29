@@ -8,6 +8,7 @@ const staticRoutes = [
   "/about",
   "/contact",
   "/services",
+  "/apps",
   "/flutter-development",
   "/android-development",
   "/web-development",

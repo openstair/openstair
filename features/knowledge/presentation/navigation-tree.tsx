@@ -21,8 +21,8 @@ export function NavigationTree({ items, currentSlug }: NavigationTreeProps) {
               "rounded-xl px-3 py-2 text-sm font-semibold transition",
               "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200",
               isActive
-                ? "bg-cyan-300/14 text-white"
-                : "text-slate-300 hover:bg-white/[0.06] hover:text-white",
+                ? "bg-slate-950 text-white"
+                : "text-[var(--color-muted)] hover:bg-slate-50 hover:text-[var(--color-ink)]",
             ].join(" ")}
           >
             {item.title}
@@ -32,4 +32,3 @@ export function NavigationTree({ items, currentSlug }: NavigationTreeProps) {
     </nav>
   );
 }
-

@@ -36,7 +36,7 @@ function renderBlock(block: MarkdownBlock, index: number): ReactNode {
   if (block.type === "heading") {
     if (block.level === 1) {
       return (
-        <h1 key={index} className="text-4xl font-semibold leading-tight text-white">
+        <h1 key={index} className="text-4xl font-semibold leading-tight text-[var(--color-ink)]">
           {block.text}
         </h1>
       );
@@ -44,14 +44,14 @@ function renderBlock(block: MarkdownBlock, index: number): ReactNode {
 
     if (block.level === 2) {
       return (
-        <h2 key={index} className="pt-4 text-2xl font-semibold text-white">
+        <h2 key={index} className="pt-4 text-2xl font-semibold text-[var(--color-ink)]">
           {block.text}
         </h2>
       );
     }
 
     return (
-      <h3 key={index} className="pt-2 text-xl font-semibold text-white">
+      <h3 key={index} className="pt-2 text-xl font-semibold text-[var(--color-ink)]">
         {block.text}
       </h3>
     );
@@ -59,7 +59,7 @@ function renderBlock(block: MarkdownBlock, index: number): ReactNode {
 
   if (block.type === "list") {
     return (
-      <ul key={index} className="list-disc space-y-2 pl-6 text-base leading-8 text-slate-300">
+      <ul key={index} className="list-disc space-y-2 pl-6 text-base leading-8 text-[var(--color-muted)]">
         {block.items.map((item) => (
           <li key={item}>{renderInlineCode(item)}</li>
         ))}
@@ -68,7 +68,7 @@ function renderBlock(block: MarkdownBlock, index: number): ReactNode {
   }
 
   return (
-    <p key={index} className="text-base leading-8 text-slate-300">
+    <p key={index} className="text-base leading-8 text-[var(--color-muted)]">
       {renderInlineCode(block.lines.join(" "))}
     </p>
   );
@@ -150,7 +150,7 @@ function renderInlineCode(value: string) {
       return (
         <code
           key={`${part}-${index}`}
-          className="rounded-md border border-white/10 bg-white/[0.06] px-1.5 py-0.5 text-sm text-cyan-100"
+          className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-sm text-cyan-700"
         >
           {part.slice(1, -1)}
         </code>

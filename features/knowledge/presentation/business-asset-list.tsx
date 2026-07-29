@@ -12,7 +12,7 @@ export function BusinessAssetList({ assets }: BusinessAssetListProps) {
     <div className="space-y-8">
       {groupedAssets.map(([category, categoryAssets]) => (
         <section key={category}>
-          <h2 className="text-2xl font-semibold capitalize text-white">
+          <h2 className="text-2xl font-semibold capitalize text-[var(--color-ink)]">
             {category}
           </h2>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
@@ -20,12 +20,12 @@ export function BusinessAssetList({ assets }: BusinessAssetListProps) {
               <Link
                 key={asset.id}
                 href={`/docs/assets/${asset.id}`}
-                className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-cyan-300/35 hover:bg-white/[0.05]"
+                className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-cyan-500/35 hover:bg-white"
               >
-                <h3 className="text-xl font-semibold text-white">
+                <h3 className="text-xl font-semibold text-[var(--color-ink)]">
                   {asset.title}
                 </h3>
-                <p className="mt-3 text-sm leading-7 text-slate-300">
+                <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
                   {asset.description}
                 </p>
                 <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">

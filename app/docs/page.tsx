@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getKnowledgeService } from "@/features/knowledge/application/knowledge-service";
 import { Breadcrumbs } from "@/features/knowledge/presentation/breadcrumbs";
@@ -36,16 +37,18 @@ export default async function DocsIndexPage() {
       />
       <DocumentRenderer body={document.body} />
       <section className="mt-10 border-t border-white/10 pt-8">
-        <h2 className="text-2xl font-semibold text-white">
-          Documentation Collections
+        <h2 className="text-2xl font-semibold text-[var(--color-ink)]">
+          Knowledge Collections
         </h2>
-        <p className="mt-3 text-base leading-8 text-slate-300">
-          Browse OpenStair knowledge by collection. Counts update from the
-          repository as documents are added.
+        <p className="mt-3 text-base leading-8 text-[var(--color-muted)]">
+          Browse company knowledge, service references, business material, and public documentation in one readable place.
         </p>
         <div className="mt-6">
           <CollectionCardGrid collections={collections} />
         </div>
+        <Link href="/services" className="btn-secondary mt-8">
+          Explore Services
+        </Link>
       </section>
     </DocsShell>
   );

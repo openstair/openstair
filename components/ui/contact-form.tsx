@@ -92,12 +92,12 @@ export function ContactForm() {
   };
 
   const inputClassName =
-    "w-full rounded-2xl border border-white/12 bg-white/[0.03] px-4 py-3.5 text-slate-100 outline-none transition duration-300 placeholder:text-slate-400 focus:border-[var(--color-accent-2)] focus:bg-white/[0.06]";
+    "w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-[var(--color-ink)] outline-none transition duration-300 placeholder:text-slate-400 focus:border-cyan-500 focus:bg-cyan-50/40";
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5">
       <div>
-        <label htmlFor="name" className="mb-2 block text-sm font-medium text-slate-200">
+        <label htmlFor="name" className="mb-2 block text-sm font-medium text-slate-700">
           Name
         </label>
         <input
@@ -113,14 +113,14 @@ export function ContactForm() {
           aria-describedby={errors.name ? "name-error" : undefined}
         />
         {errors.name ? (
-          <p id="name-error" className="mt-2 text-sm text-rose-300">
+          <p id="name-error" className="mt-2 text-sm text-rose-600">
             {errors.name}
           </p>
         ) : null}
       </div>
 
       <div>
-        <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-200">
+        <label htmlFor="email" className="mb-2 block text-sm font-medium text-slate-700">
           Work email
         </label>
         <input
@@ -137,14 +137,14 @@ export function ContactForm() {
           aria-describedby={errors.email ? "email-error" : undefined}
         />
         {errors.email ? (
-          <p id="email-error" className="mt-2 text-sm text-rose-300">
+          <p id="email-error" className="mt-2 text-sm text-rose-600">
             {errors.email}
           </p>
         ) : null}
       </div>
 
       <div>
-        <label htmlFor="message" className="mb-2 block text-sm font-medium text-slate-200">
+        <label htmlFor="message" className="mb-2 block text-sm font-medium text-slate-700">
           Message
         </label>
         <textarea
@@ -161,14 +161,14 @@ export function ContactForm() {
           aria-describedby={errors.message ? "message-error" : undefined}
         />
         {errors.message ? (
-          <p id="message-error" className="mt-2 text-sm text-rose-300">
+          <p id="message-error" className="mt-2 text-sm text-rose-600">
             {errors.message}
           </p>
         ) : null}
       </div>
 
       <div>
-        <label htmlFor="attachment" className="mb-2 block text-sm font-medium text-slate-200">
+        <label htmlFor="attachment" className="mb-2 block text-sm font-medium text-slate-700">
           Attachment (optional)
         </label>
         <input
@@ -179,10 +179,10 @@ export function ContactForm() {
           onChange={(event) =>
             setForm((prev) => ({ ...prev, attachment: event.target.files?.[0] ?? null }))
           }
-          className="w-full rounded-2xl border border-white/12 bg-white/[0.03] px-3 py-2.5 text-sm text-slate-200 file:mr-3 file:rounded-lg file:border-0 file:bg-white/12 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-slate-100 hover:file:bg-white/20"
+          className="w-full rounded-2xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-950 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:bg-slate-800"
           aria-describedby="attachment-hint"
         />
-        <p id="attachment-hint" className="mt-2 text-xs text-slate-400">
+        <p id="attachment-hint" className="mt-2 text-xs text-slate-500">
           Max size 5MB. Supported: PDF, DOC, DOCX, TXT, PNG, JPG.
         </p>
       </div>
@@ -196,13 +196,13 @@ export function ContactForm() {
       </button>
 
       {submitError ? (
-        <p role="alert" className="text-sm text-rose-300">
+        <p role="alert" className="text-sm text-rose-600">
           {submitError}
         </p>
       ) : null}
 
       {submitted ? (
-        <p role="status" aria-live="polite" className="text-sm text-emerald-300">
+        <p role="status" aria-live="polite" className="text-sm text-emerald-700">
           Thanks! We will get back to you shortly.
         </p>
       ) : null}

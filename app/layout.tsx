@@ -19,9 +19,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/favicon.ico",
+    apple: "/apple-icon.png",
   },
+  manifest: "/manifest.json",
   description:
-    "OpenStair Technologies is a software development company specializing in Flutter, Android, web, backend, and full stack solutions.",
+    "OpenStair Technologies is a software development company specializing in Flutter, Android, web, backend, and full stack solutions. Every step matters.",
   keywords: [
     "software development company",
     "Flutter development company",
@@ -36,26 +38,19 @@ export const metadata: Metadata = {
   openGraph: {
     title: "OpenStair Technologies - Software Development Company",
     description:
-      "Flutter, Android, web, backend, and full stack application development.",
+      "Flutter, Android, web, backend, and full stack application development. Every step matters.",
     url: siteUrl,
     siteName: companyName,
     locale: "en_US",
-    images: [
-      {
-        url: "/logo.png",
-        width: 512,
-        height: 512,
-        alt: `${companyName} logo`,
-      }
-    ],
+    images: ["/opengraph-image.png"],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "OpenStair Technologies - Software Development Company",
     description:
-      "Flutter, Android, web, backend, and full stack application development.",
-    images: ["/logo.png"],
+      "Flutter, Android, web, backend, and full stack application development. Every step matters.",
+    images: ["/opengraph-image.png"],
   },
 };
 

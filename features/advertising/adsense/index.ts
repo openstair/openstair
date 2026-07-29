@@ -1,5 +1,6 @@
 export { AdsenseProvider } from "@/features/advertising/adsense/adsense-provider";
 export { BannerAd, InArticleAd, MultiplexAd } from "@/features/advertising/adsense/ad-units";
+export { adSlots, hasAdSlot } from "@/features/advertising/adsense/placements";
 export {
   adsenseConfig,
   getAdsenseScriptUrl,

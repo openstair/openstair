@@ -20,12 +20,12 @@ export function GovernanceDashboard({ report }: GovernanceDashboardProps) {
         {summaryItems.map((item) => (
           <div
             key={item.label}
-            className="rounded-2xl border border-white/10 bg-white/[0.03] p-5"
+            className="rounded-2xl border border-slate-200 bg-white p-5"
           >
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
               {item.label}
             </p>
-            <p className="mt-2 text-3xl font-semibold capitalize text-white">
+            <p className="mt-2 text-3xl font-semibold capitalize text-[var(--color-ink)]">
               {item.value}
             </p>
           </div>
@@ -33,9 +33,9 @@ export function GovernanceDashboard({ report }: GovernanceDashboardProps) {
       </section>
 
       <section>
-        <h2 className="text-2xl font-semibold text-white">Diagnostics</h2>
+        <h2 className="text-2xl font-semibold text-[var(--color-ink)]">Diagnostics</h2>
         {report.diagnostics.length === 0 ? (
-          <p className="mt-3 text-base leading-8 text-slate-300">
+          <p className="mt-3 text-base leading-8 text-[var(--color-muted)]">
             No governance diagnostics were found.
           </p>
         ) : (
@@ -43,15 +43,15 @@ export function GovernanceDashboard({ report }: GovernanceDashboardProps) {
             {report.diagnostics.map((diagnostic) => (
               <div
                 key={`${diagnostic.scope}-${diagnostic.subject}-${diagnostic.message}`}
-                className="rounded-2xl border border-white/10 bg-white/[0.03] p-5"
+                className="rounded-2xl border border-slate-200 bg-white p-5"
               >
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
                   {diagnostic.severity} / {diagnostic.scope}
                 </p>
-                <h3 className="mt-2 text-lg font-semibold text-white">
+                <h3 className="mt-2 text-lg font-semibold text-[var(--color-ink)]">
                   {diagnostic.subject}
                 </h3>
-                <p className="mt-2 text-sm leading-7 text-slate-300">
+                <p className="mt-2 text-sm leading-7 text-[var(--color-muted)]">
                   {diagnostic.message}
                 </p>
               </div>
@@ -61,24 +61,24 @@ export function GovernanceDashboard({ report }: GovernanceDashboardProps) {
       </section>
 
       <section>
-        <h2 className="text-2xl font-semibold text-white">Collection Health</h2>
+        <h2 className="text-2xl font-semibold text-[var(--color-ink)]">Collection Health</h2>
         <div className="mt-5 grid gap-4">
           {report.collectionHealth.map((collection) => (
             <article
               key={collection.id}
-              className="rounded-2xl border border-white/10 bg-white/[0.03] p-5"
+              className="rounded-2xl border border-slate-200 bg-white p-5"
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <h3 className="text-xl font-semibold text-white">
+                  <h3 className="text-xl font-semibold text-[var(--color-ink)]">
                     {collection.title}
                   </h3>
-                  <p className="mt-2 text-sm text-slate-400">
+                  <p className="mt-2 text-sm text-slate-500">
                     {collection.documentCount} documents
                   </p>
                 </div>
                 {collection.lastUpdatedDocument ? (
-                  <p className="text-sm font-semibold text-slate-300">
+                  <p className="text-sm font-semibold text-[var(--color-muted)]">
                     Last updated: {collection.lastUpdatedDocument.title}
                   </p>
                 ) : null}
@@ -107,14 +107,14 @@ export function GovernanceDashboard({ report }: GovernanceDashboardProps) {
       </section>
 
       <section>
-        <h2 className="text-2xl font-semibold text-white">Coverage</h2>
+        <h2 className="text-2xl font-semibold text-[var(--color-ink)]">Coverage</h2>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           {report.coverage.map((section) => (
             <article
               key={section.title}
-              className="rounded-2xl border border-white/10 bg-white/[0.03] p-5"
+              className="rounded-2xl border border-slate-200 bg-white p-5"
             >
-              <h3 className="text-xl font-semibold text-white">
+              <h3 className="text-xl font-semibold text-[var(--color-ink)]">
                 {section.title}
               </h3>
               <ul className="mt-4 space-y-2">
@@ -123,11 +123,11 @@ export function GovernanceDashboard({ report }: GovernanceDashboardProps) {
                     key={item.label}
                     className="flex items-center justify-between gap-4 text-sm"
                   >
-                    <span className="text-slate-300">{item.label}</span>
+                    <span className="text-[var(--color-muted)]">{item.label}</span>
                     <span
                       className={
                         item.satisfied
-                          ? "font-semibold text-cyan-100"
+                          ? "font-semibold text-cyan-700"
                           : "font-semibold text-slate-500"
                       }
                     >
@@ -150,7 +150,7 @@ function Metric({ label, value }: { label: string; value: number }) {
       <dt className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
         {label}
       </dt>
-      <dd className="mt-1 text-xl font-semibold text-white">{value}</dd>
+      <dd className="mt-1 text-xl font-semibold text-[var(--color-ink)]">{value}</dd>
     </div>
   );
 }

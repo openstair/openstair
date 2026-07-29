@@ -3,10 +3,15 @@ import type { ReactNode } from "react";
 type SectionProps = {
   children: ReactNode;
   className?: string;
+  id?: string;
 };
 
-export function Section({ children, className }: SectionProps) {
+export function Section({ children, className, id }: SectionProps) {
   const classes = [className].filter(Boolean).join(" ");
 
-  return <section className={classes}>{children}</section>;
+  return (
+    <section id={id} className={classes}>
+      {children}
+    </section>
+  );
 }

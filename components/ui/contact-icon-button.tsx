@@ -73,14 +73,14 @@ function ContactIcon({ id }: { id: string }) {
 function Content({ id, label, value }: Omit<ContactIconButtonProps, "href">) {
   return (
     <>
-      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-cyan-300/18 bg-cyan-300/8 text-cyan-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition duration-300 group-hover:border-cyan-200/40 group-hover:bg-cyan-300/14 group-hover:text-white">
+      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl border border-cyan-500/18 bg-cyan-100 text-cyan-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] transition duration-300 group-hover:border-cyan-500/40 group-hover:bg-cyan-200/70 group-hover:text-[var(--color-ink)]">
         <ContactIcon id={id} />
       </span>
       <span className="min-w-0">
-        <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-slate-400 transition duration-300 group-hover:text-cyan-100/90">
+        <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-slate-500 transition duration-300 group-hover:text-cyan-700/90">
           {label}
         </span>
-        <span className="mt-1 block truncate text-sm font-semibold text-slate-100">
+        <span className="mt-1 block truncate text-sm font-semibold text-[var(--color-ink)]">
           {value}
         </span>
       </span>
@@ -90,7 +90,7 @@ function Content({ id, label, value }: Omit<ContactIconButtonProps, "href">) {
 
 export function ContactIconButton({ id, label, value, href }: ContactIconButtonProps) {
   const className =
-    "group relative flex min-h-16 w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.035] px-3.5 py-3 text-left transition duration-300 hover:-translate-y-0.5 hover:border-cyan-300/32 hover:bg-white/[0.065] hover:shadow-[0_18px_42px_rgba(8,145,178,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-200";
+    "group relative flex min-h-16 w-full items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3.5 py-3 text-left transition duration-300 hover:-translate-y-0.5 hover:border-cyan-500/32 hover:bg-cyan-50 hover:shadow-[0_18px_42px_rgba(8,145,178,0.12)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-500";
   const title = `${label}: ${value}`;
 
   if (!href) {

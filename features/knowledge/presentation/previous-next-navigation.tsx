@@ -17,7 +17,7 @@ export function PreviousNextNavigation({
   return (
     <nav
       aria-label="Previous and next documents"
-      className="mt-10 grid gap-4 border-t border-white/10 pt-6 md:grid-cols-2"
+      className="mt-10 grid gap-4 border-t border-slate-200 pt-6 md:grid-cols-2"
     >
       <NavigationLink direction="Previous" document={previous} />
       <NavigationLink direction="Next" document={next} alignEnd />
@@ -42,14 +42,14 @@ function NavigationLink({
     <Link
       href={document.slug ? `/docs/${document.slug}` : "/docs"}
       className={[
-        "rounded-2xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-cyan-300/35 hover:bg-white/[0.05]",
+        "rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-cyan-500/35 hover:bg-white",
         alignEnd ? "md:text-right" : "",
       ].join(" ")}
     >
       <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
         {direction}
       </span>
-      <span className="mt-2 block text-base font-semibold text-white">
+      <span className="mt-2 block text-base font-semibold text-[var(--color-ink)]">
         {document.title}
       </span>
     </Link>

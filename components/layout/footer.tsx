@@ -2,9 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Container } from "@/components/layout/container";
 import {
+  footerLinks,
+  legalLinks,
   platformLinks,
-  quickLinks,
-  serviceLinks,
   siteName,
 } from "@/lib/site-content";
 
@@ -137,43 +137,42 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="relative mt-24 overflow-hidden border-t border-white/10 bg-[#070d1a]/78">
-      <div className="pointer-events-none absolute -top-24 left-8 h-56 w-56 rounded-full bg-cyan-300/10 blur-3xl" />
-      <div className="pointer-events-none absolute -right-20 bottom-0 h-64 w-64 rounded-full bg-sky-400/10 blur-3xl" />
+    <footer className="relative mt-24 overflow-hidden bg-[#07111f]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/70 to-transparent" />
 
-      <Container className="relative py-12 md:py-14">
-        <div className="grid gap-10 lg:grid-cols-[1.25fr_0.8fr_0.9fr_1fr]">
+      <Container className="relative py-10 md:py-12">
+        <div className="grid gap-10 lg:grid-cols-[1.15fr_1fr_0.75fr_1fr] lg:items-start">
           <section aria-label="OpenStair Technologies" className="max-w-md">
             <Link
               href="/"
               className="inline-flex items-center gap-3 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-200"
               aria-label="OpenStair Technologies home"
             >
-              <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-cyan-300/25 bg-cyan-300/10 shadow-[0_0_26px_rgba(103,232,249,0.16)]">
+              <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-300/25 bg-white shadow-[0_0_34px_rgba(103,232,249,0.18)]">
                 <Image src="/logo.png" alt="" width={28} height={28} aria-hidden="true" />
               </span>
               <span>
                 <span className="block text-lg font-semibold leading-tight text-white">
                   {siteName}
                 </span>
-                <span className="mt-0.5 block text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                  Flutter & Full Stack Development
+                <span className="mt-0.5 block whitespace-nowrap text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate-400">
+                  Every step matters
                 </span>
               </span>
             </Link>
-            <p className="mt-5 text-sm leading-7 text-[var(--color-muted)]">
-              Flutter, Android, Web and Backend development company building scalable modern applications with full stack engineering.
+            <p className="mt-5 text-sm leading-7 text-slate-300">
+              Premium mobile, web, and backend engineering for companies that need dependable software delivery.
             </p>
           </section>
 
-          <FooterLinkList title="Quick Links" links={quickLinks} />
-          <FooterLinkList title="Services" links={serviceLinks} />
+          <FooterLinkList title="Company" links={footerLinks} />
+          <FooterLinkList title="Legal" links={legalLinks} />
 
           <section aria-labelledby="platform-links">
             <h2 id="platform-links" className="text-sm font-semibold text-white">
-              Social & Platforms
+              Social Links
             </h2>
-            <ul className="mt-4 grid grid-cols-4 gap-3 sm:flex sm:flex-wrap">
+            <ul className="mt-4 flex flex-wrap gap-3">
               {platformLinks.map((link) => (
                 <li key={link.href}>
                   <Link
@@ -189,22 +188,14 @@ export function Footer() {
                 </li>
               ))}
             </ul>
-            <p className="mt-5 text-sm leading-7 text-slate-400">
-              Explore our apps, developer work, and updates across OpenStair platforms.
-            </p>
           </section>
         </div>
 
         <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} OpenStair Technologies. All rights reserved.</p>
-          <Link
-            href="https://apps.openstair.in"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-semibold text-slate-300 transition duration-300 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-200"
-          >
-            Apps by OpenStair
-          </Link>
+          <p className="font-semibold uppercase tracking-[0.14em] text-slate-500">
+            Every step matters
+          </p>
         </div>
       </Container>
     </footer>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { InArticleAd, MultiplexAd, adSlots, hasAdSlot } from "@/features/advertising/adsense";
 import { getKnowledgeService } from "@/features/knowledge/application/knowledge-service";
 import { getCollectionDefinitionById } from "@/features/knowledge/domain/collection";
 import { Breadcrumbs } from "@/features/knowledge/presentation/breadcrumbs";
@@ -142,11 +143,11 @@ export default async function DocsPage({ params }: DocsPageProps) {
             { label: "Assets" },
           ]}
         />
-        <header className="mb-8 border-b border-white/10 pb-6">
+        <header className="mb-8 border-b border-slate-200 pb-6">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-accent)]">
             Business Assets
           </p>
-          <h1 className="mt-3 text-4xl font-semibold leading-tight text-white">
+          <h1 className="mt-3 text-4xl font-semibold leading-tight text-[var(--color-ink)]">
             Business Assets
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-8 text-slate-300">
@@ -171,11 +172,11 @@ export default async function DocsPage({ params }: DocsPageProps) {
             { label: "Governance" },
           ]}
         />
-        <header className="mb-8 border-b border-white/10 pb-6">
+        <header className="mb-8 border-b border-slate-200 pb-6">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-accent)]">
             Governance
           </p>
-          <h1 className="mt-3 text-4xl font-semibold leading-tight text-white">
+          <h1 className="mt-3 text-4xl font-semibold leading-tight text-[var(--color-ink)]">
             Knowledge Governance
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-8 text-slate-300">
@@ -208,11 +209,11 @@ export default async function DocsPage({ params }: DocsPageProps) {
             { label: asset.title },
           ]}
         />
-        <header className="mb-8 border-b border-white/10 pb-6">
+        <header className="mb-8 border-b border-slate-200 pb-6">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-accent)]">
             Business Asset
           </p>
-          <h1 className="mt-3 text-4xl font-semibold leading-tight text-white">
+          <h1 className="mt-3 text-4xl font-semibold leading-tight text-[var(--color-ink)]">
             {asset.title}
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-8 text-slate-300">
@@ -255,11 +256,11 @@ export default async function DocsPage({ params }: DocsPageProps) {
             { label: collection.title },
           ]}
         />
-        <header className="mb-8 border-b border-white/10 pb-6">
+        <header className="mb-8 border-b border-slate-200 pb-6">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-accent)]">
             Collection
           </p>
-          <h1 className="mt-3 text-4xl font-semibold leading-tight text-white">
+          <h1 className="mt-3 text-4xl font-semibold leading-tight text-[var(--color-ink)]">
             {collection.title}
           </h1>
           <p className="mt-4 max-w-3xl text-base leading-8 text-slate-300">
@@ -299,8 +300,20 @@ export default async function DocsPage({ params }: DocsPageProps) {
       />
       <DocumentMetadata document={document} />
       <DocumentRenderer body={document.body} />
+      {hasAdSlot(adSlots.docsInArticle) ? (
+        <InArticleAd
+          slotId={adSlots.docsInArticle}
+          className="my-10 min-h-32 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+        />
+      ) : null}
       <UsedInAssets assets={usedInAssets} />
       <RelatedDocuments documents={relatedDocuments} />
+      {hasAdSlot(adSlots.docsMultiplex) ? (
+        <MultiplexAd
+          slotId={adSlots.docsMultiplex}
+          className="my-10 min-h-40 rounded-2xl border border-slate-200 bg-white p-4"
+        />
+      ) : null}
       <PreviousNextNavigation
         previous={adjacentDocuments.previous}
         next={adjacentDocuments.next}

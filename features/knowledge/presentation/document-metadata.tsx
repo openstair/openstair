@@ -13,13 +13,13 @@ export function DocumentMetadata({ document }: DocumentMetadataProps) {
   ];
 
   return (
-    <dl className="mb-8 grid gap-3 border-b border-white/10 pb-6 sm:grid-cols-2 lg:grid-cols-4">
+    <dl className="mb-8 grid gap-3 border-b border-slate-200 pb-6 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((item) => (
         <div key={item.label}>
           <dt className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
             {item.label}
           </dt>
-          <dd className="mt-1 text-sm font-semibold capitalize text-slate-200">
+          <dd className="mt-1 text-sm font-semibold capitalize text-slate-700">
             {item.value}
           </dd>
         </div>

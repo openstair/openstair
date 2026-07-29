@@ -4,8 +4,14 @@ import { SiteShell } from "@/components/layout/site-shell";
 import { CardGrid } from "@/components/ui/card-grid";
 import { CtaPanel } from "@/components/ui/cta-panel";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { VisualPlaceholder } from "@/components/ui/visual-placeholder";
 import { createSeoMetadata } from "@/lib/seo";
-import { featureCards, howItWorks, technologies } from "@/lib/site-content";
+import {
+  engineeringProcess,
+  featureCards,
+  featuredApps,
+  trustIndicators,
+} from "@/lib/site-content";
 
 export const metadata = createSeoMetadata({
   title: "Software Development Company",
@@ -22,55 +28,63 @@ export const metadata = createSeoMetadata({
   ],
 });
 
-const projectHighlights = [
-  {
-    title: "Mobile Apps",
-    description:
-      "Flutter and Android apps for consumer products, business tools, internal operations, and public launches.",
-  },
-  {
-    title: "Web Platforms",
-    description:
-      "SEO-ready company websites, responsive web applications, dashboards, and product interfaces.",
-  },
-  {
-    title: "Backend Systems",
-    description:
-      "APIs, authentication, database architecture, admin workflows, integrations, and deployment support.",
-  },
-];
-
 export default function HomePage() {
   return (
     <SiteShell>
-      <Section className="relative overflow-hidden pt-18 pb-16 sm:pt-22 md:pt-28 md:pb-24">
-        <div className="soft-pulse absolute top-8 right-[-90px] h-52 w-52 rounded-full bg-cyan-300/15 blur-3xl md:h-72 md:w-72" />
-        <div className="reveal relative max-w-3xl">
-          <p className="inline-flex rounded-full border border-cyan-300/30 bg-cyan-300/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">
-            Software Development Company
-          </p>
-          <h1 className="mt-7 text-4xl font-semibold leading-[1.05] text-white sm:text-5xl md:text-6xl">
-            We build scalable Flutter, Android, web, and backend applications.
-          </h1>
-          <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--color-muted)] sm:text-lg">
-            OpenStair Technologies helps businesses design, develop, and launch modern software products with clean engineering, strong user experience, and production-ready architecture.
-          </p>
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <Link href="/contact" className="btn-primary reveal-delay-1 text-center">
-              Start a project
-            </Link>
-            <Link href="/services" className="btn-secondary reveal-delay-2 text-center">
-              Explore services
-            </Link>
+      <Section className="relative overflow-hidden pt-16 pb-14 sm:pt-20 md:pt-24 md:pb-20">
+        <div className="relative grid gap-10 lg:grid-cols-[0.86fr_1.14fr] lg:items-center">
+          <div className="reveal max-w-3xl">
+            <p className="eyebrow">Software Engineering Company</p>
+            <h1 className="mt-7 text-4xl font-semibold leading-[1.02] text-[var(--color-ink)] sm:text-5xl md:text-6xl">
+              Premium software engineering for products that need to feel reliable from day one.
+            </h1>
+            <p className="mt-6 max-w-2xl text-base leading-8 text-[var(--color-muted)] sm:text-lg">
+              OpenStair Technologies designs and builds mobile apps, web platforms, backend systems, and launch-ready product foundations with clear architecture and careful delivery ownership.
+            </p>
+            <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Link href="/contact" className="btn-primary reveal-delay-1 text-center">
+                Book consultation
+              </Link>
+              <Link href="/services" className="btn-secondary reveal-delay-2 text-center">
+                Explore services
+              </Link>
+            </div>
           </div>
+          <VisualPlaceholder
+            assetName="dummy_image_home_hero.webp"
+            title="Mobile, web, and backend systems moving as one product."
+            description="Reserved hero illustration slot for future animated product architecture artwork."
+            className="reveal reveal-delay-1"
+          />
         </div>
       </Section>
 
-      <Section className="py-12 md:py-18">
+      <Section className="py-10 md:py-14">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {trustIndicators.map((indicator) => (
+            <div
+              key={indicator.label}
+              className="surface-card reveal rounded-2xl px-5 py-5"
+            >
+              <p className="text-2xl font-semibold text-[var(--color-ink)]">
+                {indicator.value}
+              </p>
+              <h2 className="mt-2 text-sm font-bold text-cyan-700">
+                {indicator.label}
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-[var(--color-muted)]">
+                {indicator.detail}
+              </p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section id="process" className="py-12 md:py-18">
         <SectionHeading
           eyebrow="Services"
-          title="Product engineering across mobile, web, and backend"
-          description="From idea validation to production launch, we build the core software layers your product needs to scale."
+          title="Focused engineering services, not a menu of buzzwords"
+          description="Each engagement starts with the product problem, then maps to the right interface, system, and launch path."
         />
         <CardGrid
           items={featureCards.map((service) => ({
@@ -83,67 +97,70 @@ export default function HomePage() {
                   : service.title === "Web Development"
                     ? "/web-development"
                     : "/backend-development",
+            label: "Explore service",
           }))}
         />
       </Section>
 
       <Section className="py-12 md:py-18">
-        <SectionHeading
-          eyebrow="Technologies"
-          title="Modern tools for reliable application delivery"
-          description="We choose practical technologies that support speed, maintainability, performance, and clean handover."
-        />
-        <div className="mt-10 flex flex-wrap gap-3">
-          {technologies.map((technology) => (
-            <span
-              key={technology}
-              className="reveal rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-200"
-            >
-              {technology}
-            </span>
-          ))}
+        <div className="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+          <VisualPlaceholder
+            assetName={featuredApps[0].assetName}
+            title={featuredApps[0].title}
+            description="Flagship shipped product showcase with room for screenshots, metrics, and store assets."
+            className="reveal"
+          />
+          <div>
+            <SectionHeading
+              eyebrow="Portfolio"
+              title="Apps are presented where they belong: the official OpenStair product portfolio"
+              description="Memory Match King anchors the Apps page as a shipped product showcase, keeping portfolio storytelling focused instead of scattered across the website."
+            />
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Link href="/apps" className="btn-primary">
+                View Applications
+              </Link>
+              <Link href="https://apps.openstair.in" className="btn-secondary">
+                Apps platform
+              </Link>
+            </div>
+          </div>
         </div>
       </Section>
 
       <Section className="py-12 md:py-18">
-        <SectionHeading
-          eyebrow="Process"
-          title="A focused path from concept to production"
-          description="Our delivery style keeps communication clear, engineering decisions visible, and every build aligned with the product goal."
-        />
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 md:grid-cols-3">
-          {howItWorks.map((item, index) => (
-            <article
-              key={item.step}
-              className="reveal rounded-2xl border border-white/10 bg-[var(--color-surface)] p-6 transition duration-300 hover:border-cyan-300/30"
+        <div className="dark-panel rounded-[1.75rem] p-7 md:p-10">
+          <div className="max-w-2xl reveal">
+            <p className="eyebrow border-cyan-200/20 bg-cyan-200/10 text-cyan-100">
+              Engineering Process
+            </p>
+            <h2 className="mt-4 text-3xl font-semibold leading-tight text-white md:text-4xl">
+              A delivery system shaped around product risk.
+            </h2>
+            <p className="mt-4 text-base leading-8 text-slate-300">
+              OpenStair keeps planning, implementation, and handover visible so decisions remain understandable after launch.
+            </p>
+          </div>
+          <div className="mt-10 grid gap-4 md:grid-cols-3">
+            {engineeringProcess.map((item) => (
+              <article
+                key={item.step}
+              className="reveal rounded-2xl border border-white/10 bg-white/[0.06] p-6"
             >
-              <p className="text-sm font-semibold text-[var(--color-accent)]">
-                0{index + 1}
-              </p>
-              <h3 className="mt-3 text-xl font-semibold text-white">{item.step}</h3>
-              <p className="mt-3 text-sm leading-7 text-[var(--color-muted)]">
-                {item.description}
-              </p>
-            </article>
-          ))}
+                <p className="text-sm font-black text-cyan-200">{item.step}</p>
+                <h3 className="mt-4 text-xl font-semibold text-white">
+                  {item.title}
+                </h3>
+                <p className="mt-3 text-sm leading-7 text-slate-300">
+                  {item.description}
+                </p>
+              </article>
+            ))}
+          </div>
         </div>
       </Section>
 
-      <Section className="py-12 md:py-18">
-        <SectionHeading
-          eyebrow="Featured Work"
-          title="Apps and systems built for real product use"
-          description="Our work spans mobile apps, web platforms, backend services, and full stack solutions for businesses that need dependable software."
-        />
-        <CardGrid items={projectHighlights} />
-        <div className="mt-8">
-          <Link href="https://apps.openstair.in" className="btn-secondary">
-            View OpenStair apps
-          </Link>
-        </div>
-      </Section>
-
-      <CtaPanel />
+      <CtaPanel variant="home" illustrationAssetName="dummy_image_consultation.webp" />
     </SiteShell>
   );
 }

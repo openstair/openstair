@@ -32,10 +32,10 @@ export function createSeoMetadata({
       siteName: companyName,
       images: [
         {
-          url: "/logo.png",
-          width: 512,
-          height: 512,
-          alt: `${companyName} logo`,
+          url: "/opengraph-image.png",
+          width: 1200,
+          height: 630,
+          alt: `${companyName} social sharing image`,
         },
       ],
       type: "website",
@@ -44,7 +44,7 @@ export function createSeoMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: ["/logo.png"],
+      images: ["/opengraph-image.png"],
     },
   };
 }
@@ -56,14 +56,14 @@ export const organizationJsonLd = {
   url: siteUrl,
   logo: `${siteUrl}/logo.png`,
   description:
-    "OpenStair Technologies is a software development company specializing in Flutter, Android, web, backend, and full stack application development.",
+    "OpenStair Technologies is a software development company specializing in Flutter, Android, web, backend, and full stack application development. Every step matters.",
   sameAs: [
     "https://apps.openstair.in",
     "https://github.com/openstair",
     "https://pub.dev/publishers/openstair.in",
-    "https://www.instagram.com/open.stair",
+    "https://www.instagram.com/openstair.in",
     "https://www.facebook.com/openstair1",
-    "https://www.youtube.com/@open.stair-1",
+    "https://www.youtube.com/@openstair1",
     "https://play.google.com/store/apps/dev?id=8492821411434576790",
     "https://www.linkedin.com/company/openstair"
   ],
