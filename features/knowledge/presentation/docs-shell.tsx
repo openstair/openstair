@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { SiteShell } from "@/components/layout/site-shell";
-import { VisualPlaceholder } from "@/components/ui/visual-placeholder";
+import { BrandImage } from "@/components/ui/brand-image";
 import type { NavigationTreeItem } from "@/features/knowledge/domain/navigation";
 import { NavigationTree } from "@/features/knowledge/presentation/navigation-tree";
 
@@ -28,10 +28,10 @@ export function DocsShell({
               A curated view of OpenStair company knowledge, service thinking, and public business documentation.
             </p>
           </div>
-          <VisualPlaceholder
-            assetName="dummy_image_docs_hero.webp"
-            title="Readable company knowledge for clients and collaborators."
-            description="Reserved documentation visual for future editorial artwork."
+          <BrandImage
+            asset="documentationHero"
+            caption="Readable company knowledge for clients and collaborators."
+            description="Company knowledge, public documentation, and governance material kept readable."
             className="hidden lg:block"
           />
         </div>

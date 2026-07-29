@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { Section } from "@/components/layout/section";
 import { SiteShell } from "@/components/layout/site-shell";
+import { BrandImage } from "@/components/ui/brand-image";
 import { CtaPanel } from "@/components/ui/cta-panel";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { VisualPlaceholder } from "@/components/ui/visual-placeholder";
 import { createSeoMetadata } from "@/lib/seo";
 
 export const metadata = createSeoMetadata({
@@ -34,11 +34,12 @@ export default function AboutPage() {
               OpenStair Technologies builds scalable applications for businesses that need dependable engineering, thoughtful interfaces, and clean technical foundations.
             </p>
           </div>
-          <VisualPlaceholder
-            assetName="dummy_image_about_company.webp"
-            title="OpenStair Technologies"
-            description="Reserved company visual sourced from the OpenStair Knowledge Platform."
+          <BrandImage
+            asset="aboutHero"
+            caption="OpenStair Technologies"
+            description="Company knowledge, service thinking, and engineering standards in one system."
             className="reveal reveal-delay-1"
+            priority
           />
         </div>
       </Section>
@@ -60,20 +61,25 @@ export default function AboutPage() {
 
       <Section className="py-12 md:py-18">
         <article className="surface-card reveal rounded-3xl p-8 md:p-10">
-          <SectionHeading
-            eyebrow="Company Role"
-            title="What We Build"
-            description="OpenStair acts as a technical partner for organizations that need product planning, implementation, integration, and launch support."
-          />
+            <SectionHeading
+              eyebrow="Company Role"
+              title="What We Build"
+            description="OpenStair acts as a technical partner for organizations that need product planning, engineering, integration, and launch support."
+            />
           <p className="mt-5 text-base leading-8 text-[var(--color-muted)]">
             OpenStair works across mobile app development, responsive web development, backend development, and full stack solutions. We build Flutter apps, native Android experiences, SEO-friendly websites, scalable APIs, database-backed systems, and integrations that connect products to the services they depend on.
           </p>
           <p className="mt-5 text-base leading-8 text-[var(--color-muted)]">
             Our goal is not only to ship features. We help shape software that is maintainable, performant, and understandable for the teams who will grow it after launch.
           </p>
-          <Link href="/docs" className="btn-secondary mt-7">
-            Read Documentation
-          </Link>
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            <Link href="/docs" className="btn-secondary">
+              Read Documentation
+            </Link>
+            <Link href="/blog" className="btn-secondary">
+              Read Engineering Notes
+            </Link>
+          </div>
         </article>
       </Section>
 

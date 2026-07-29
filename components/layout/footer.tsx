@@ -1,12 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Container } from "@/components/layout/container";
-import {
-  footerLinks,
-  legalLinks,
-  platformLinks,
-  siteName,
-} from "@/lib/site-content";
+import { BrandLogo } from "@/components/ui/brand-logo";
+import { platformLinks, siteName } from "@/lib/site-content";
 
 function PlatformIcon({ icon }: { icon: (typeof platformLinks)[number]["icon"] }) {
   const strokeProps = {
@@ -133,6 +128,28 @@ function FooterLinkList({
   );
 }
 
+const resourceLinks = [
+  { href: "/services", label: "Services" },
+  { href: "/apps", label: "Applications" },
+  { href: "/docs", label: "Documentation" },
+  { href: "/blog", label: "Blog" },
+  { href: "/open-source", label: "Open Source" },
+] as const;
+
+const companyLinks = [
+  { href: "/about", label: "About" },
+  { href: "/contact", label: "Contact" },
+] as const;
+
+const legalLinks = [
+  { href: "/docs/legal/privacy-policy-overview", label: "Privacy" },
+  { href: "/docs/legal/terms-overview", label: "Terms" },
+] as const;
+
+const footerSocialLinks = platformLinks.filter((link) =>
+  ["GitHub", "LinkedIn", "Instagram", "Facebook", "YouTube"].includes(link.label),
+);
+
 export function Footer() {
   const year = new Date().getFullYear();
 
@@ -141,7 +158,7 @@ export function Footer() {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/70 to-transparent" />
 
       <Container className="relative py-10 md:py-12">
-        <div className="grid gap-10 lg:grid-cols-[1.15fr_1fr_0.75fr_1fr] lg:items-start">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-[1.35fr_0.8fr_0.7fr_0.65fr_1fr] lg:items-start">
           <section aria-label="OpenStair Technologies" className="max-w-md">
             <Link
               href="/"
@@ -149,31 +166,42 @@ export function Footer() {
               aria-label="OpenStair Technologies home"
             >
               <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-300/25 bg-white shadow-[0_0_34px_rgba(103,232,249,0.18)]">
-                <Image src="/logo.png" alt="" width={28} height={28} aria-hidden="true" />
+                <BrandLogo markOnly className="h-7 w-7" />
               </span>
               <span>
                 <span className="block text-lg font-semibold leading-tight text-white">
                   {siteName}
                 </span>
                 <span className="mt-0.5 block whitespace-nowrap text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate-400">
-                  Every step matters
+                  EVERY STEP MATTERS
                 </span>
               </span>
             </Link>
             <p className="mt-5 text-sm leading-7 text-slate-300">
-              Premium mobile, web, and backend engineering for companies that need dependable software delivery.
+              OpenStair Technologies builds dependable mobile, web, and backend software with clear architecture, practical documentation, and long-term delivery ownership.
             </p>
+            <address className="mt-5 not-italic text-sm leading-7 text-slate-400">
+              <span className="block text-slate-300">Address</span>
+              Kirtinagar
+              <br />
+              Tehri Garhwal
+              <br />
+              Uttarakhand – 249161
+              <br />
+              India
+            </address>
           </section>
 
-          <FooterLinkList title="Company" links={footerLinks} />
+          <FooterLinkList title="Resources" links={resourceLinks} />
+          <FooterLinkList title="Company" links={companyLinks} />
           <FooterLinkList title="Legal" links={legalLinks} />
 
           <section aria-labelledby="platform-links">
             <h2 id="platform-links" className="text-sm font-semibold text-white">
-              Social Links
+              Social
             </h2>
             <ul className="mt-4 flex flex-wrap gap-3">
-              {platformLinks.map((link) => (
+              {footerSocialLinks.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
@@ -194,7 +222,7 @@ export function Footer() {
         <div className="mt-10 flex flex-col gap-3 border-t border-white/10 pt-6 text-sm text-slate-400 sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} OpenStair Technologies. All rights reserved.</p>
           <p className="font-semibold uppercase tracking-[0.14em] text-slate-500">
-            Every step matters
+            EVERY STEP MATTERS
           </p>
         </div>
       </Container>

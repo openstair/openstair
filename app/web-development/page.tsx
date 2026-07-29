@@ -1,4 +1,5 @@
 import { ServiceLanding } from "@/components/ui/service-landing";
+import { socialAssets } from "@/lib/brand-assets";
 import { createSeoMetadata } from "@/lib/seo";
 import { servicePages } from "@/lib/services";
 
@@ -14,6 +15,7 @@ export const metadata = createSeoMetadata({
     "scalable web applications",
     "responsive websites",
   ],
+  image: socialAssets.pages.services,
 });
 
 export default function WebDevelopmentPage() {

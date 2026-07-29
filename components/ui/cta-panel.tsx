@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { VisualPlaceholder } from "@/components/ui/visual-placeholder";
+import { BrandImage } from "@/components/ui/brand-image";
+import type { BrandImageKey } from "@/lib/brand-assets";
 
 type CtaVariant = "home" | "services" | "about" | "blog" | "open-source";
 type CtaTone = "light" | "dark";
@@ -31,8 +32,8 @@ const ctaVariants: Record<
     title: "Let's build your next software product.",
     primaryHref: "/contact",
     primaryLabel: "Book Consultation",
-    secondaryHref: "/#process",
-    secondaryLabel: "View Process",
+    secondaryHref: "/#capabilities",
+    secondaryLabel: "View Capabilities",
   },
   about: {
     eyebrow: "Engineering Approach",
@@ -70,7 +71,7 @@ type CtaPanelProps = {
   primaryLabel?: string;
   secondaryHref?: string | null;
   secondaryLabel?: string;
-  illustrationAssetName?: string;
+  illustrationAsset?: BrandImageKey;
   illustrationTitle?: string;
 };
 
@@ -83,7 +84,7 @@ export function CtaPanel({
   primaryLabel,
   secondaryHref,
   secondaryLabel,
-  illustrationAssetName,
+  illustrationAsset,
   illustrationTitle = "Project planning",
 }: CtaPanelProps) {
   const preset = ctaVariants[variant];
@@ -107,7 +108,7 @@ export function CtaPanel({
         <div
           className={[
             "grid gap-5",
-            illustrationAssetName
+            illustrationAsset
               ? "lg:grid-cols-[1fr_16rem] lg:items-center"
               : "lg:grid-cols-[1fr_auto] lg:items-center",
           ].join(" ")}
@@ -140,12 +141,13 @@ export function CtaPanel({
               </p>
             ) : null}
           </div>
-          {illustrationAssetName ? (
-            <VisualPlaceholder
-              assetName={illustrationAssetName}
-              title={illustrationTitle}
+          {illustrationAsset ? (
+            <BrandImage
+              asset={illustrationAsset}
+              caption={illustrationTitle}
               aspect="wide"
               className="hidden max-h-44 lg:block"
+              sizes="16rem"
             />
           ) : null}
           <div className="flex flex-col gap-3 sm:flex-row lg:justify-end">

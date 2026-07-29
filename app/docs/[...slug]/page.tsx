@@ -16,6 +16,7 @@ import {
   RelatedDocuments,
   UsedInAssets,
 } from "@/features/knowledge/presentation/related-documents";
+import { socialAssets } from "@/lib/brand-assets";
 import { createSeoMetadata } from "@/lib/seo";
 
 type DocsPageProps = {
@@ -66,6 +67,7 @@ export async function generateMetadata({
       description:
         "Internal governance dashboard for OpenStair Knowledge Platform quality and coverage.",
       path: "/docs/governance",
+      image: socialAssets.pages.documentation,
     });
   }
 
@@ -75,6 +77,7 @@ export async function generateMetadata({
       description:
         "Reusable OpenStair business assets prepared for future PDF, DOCX, and print exports.",
       path: "/docs/assets",
+      image: socialAssets.pages.documentation,
     });
   }
 
@@ -83,6 +86,7 @@ export async function generateMetadata({
       title: asset.title,
       description: asset.description,
       path: `/docs/assets/${asset.id}`,
+      image: socialAssets.pages.documentation,
     });
   }
 
@@ -96,6 +100,7 @@ export async function generateMetadata({
       title: `${collection.title} Documentation`,
       description: collection.description,
       path: `/docs/${collection.slug}`,
+      image: socialAssets.pages.documentation,
     });
   }
 
@@ -104,6 +109,7 @@ export async function generateMetadata({
       title: document.metadata.title,
       description: document.metadata.description,
       path: `/docs/${document.slug}`,
+      image: socialAssets.pages.documentation,
     });
   }
 

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { brandLogos, socialAssets } from "@/lib/brand-assets";
 
 export const siteUrl = "https://openstair.in";
 export const companyName = "OpenStair Technologies";
@@ -8,6 +9,7 @@ type SeoMetadataInput = {
   description: string;
   path: string;
   keywords?: string[];
+  image?: string;
 };
 
 export function createSeoMetadata({
@@ -15,8 +17,10 @@ export function createSeoMetadata({
   description,
   path,
   keywords,
+  image,
 }: SeoMetadataInput): Metadata {
   const url = new URL(path, siteUrl).toString();
+  const openGraphImage = image ?? socialAssets.defaultOpenGraph;
 
   return {
     title,
@@ -32,7 +36,7 @@ export function createSeoMetadata({
       siteName: companyName,
       images: [
         {
-          url: "/opengraph-image.png",
+          url: openGraphImage,
           width: 1200,
           height: 630,
           alt: `${companyName} social sharing image`,
@@ -44,7 +48,7 @@ export function createSeoMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: ["/opengraph-image.png"],
+      images: [openGraphImage],
     },
   };
 }
@@ -54,7 +58,7 @@ export const organizationJsonLd = {
   "@type": "Organization",
   name: companyName,
   url: siteUrl,
-  logo: `${siteUrl}/logo.png`,
+  logo: `${siteUrl}${brandLogos.mark.src}`,
   description:
     "OpenStair Technologies is a software development company specializing in Flutter, Android, web, backend, and full stack application development. Every step matters.",
   sameAs: [

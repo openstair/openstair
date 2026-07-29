@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { Section } from "@/components/layout/section";
 import { SiteShell } from "@/components/layout/site-shell";
+import { BrandImage } from "@/components/ui/brand-image";
 import { CardGrid } from "@/components/ui/card-grid";
 import { CtaPanel } from "@/components/ui/cta-panel";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { VisualPlaceholder } from "@/components/ui/visual-placeholder";
+import { socialAssets, type BrandImageKey } from "@/lib/brand-assets";
 import { createSeoMetadata } from "@/lib/seo";
 import { services } from "@/lib/services";
 
@@ -12,7 +13,7 @@ const servicePresentation: Record<
   string,
   {
     icon: string;
-    assetName: string;
+    asset: BrandImageKey;
     problem: string;
     solution: string;
     technology: string;
@@ -21,7 +22,7 @@ const servicePresentation: Record<
 > = {
   "Flutter Development": {
     icon: "FL",
-    assetName: "dummy_image_flutter_service.webp",
+    asset: "serviceFlutter",
     problem: "Shipping separate mobile apps slows product learning.",
     solution: "Build one polished cross-platform experience.",
     technology: "Flutter, Dart, APIs, release workflows.",
@@ -29,7 +30,7 @@ const servicePresentation: Record<
   },
   "Android Development": {
     icon: "AN",
-    assetName: "dummy_image_flutter_service.webp",
+    asset: "serviceAndroid",
     problem: "Platform details affect performance and trust.",
     solution: "Engineer native Android flows with release discipline.",
     technology: "Android, Kotlin-ready patterns, Play Store support.",
@@ -37,7 +38,7 @@ const servicePresentation: Record<
   },
   "Web Development": {
     icon: "WB",
-    assetName: "dummy_image_web_service.webp",
+    asset: "serviceWeb",
     problem: "Generic websites weaken credibility.",
     solution: "Create fast public surfaces and scalable web apps.",
     technology: "Next.js, React, TypeScript, technical SEO.",
@@ -45,7 +46,7 @@ const servicePresentation: Record<
   },
   "Backend Development": {
     icon: "BE",
-    assetName: "dummy_image_backend_service.webp",
+    asset: "serviceBackend",
     problem: "Products break when APIs and data are improvised.",
     solution: "Design secure services, models, and integrations.",
     technology: "Spring Boot, REST APIs, databases, auth.",
@@ -53,7 +54,7 @@ const servicePresentation: Record<
   },
   "API Integration": {
     icon: "API",
-    assetName: "dummy_image_backend_service.webp",
+    asset: "serviceCloud",
     problem: "External services often create fragile product flows.",
     solution: "Connect payments, auth, analytics, and notifications cleanly.",
     technology: "REST APIs, webhooks, typed clients, monitoring.",
@@ -61,7 +62,7 @@ const servicePresentation: Record<
   },
   "Full Stack Solutions": {
     icon: "FS",
-    assetName: "dummy_image_ai_service.webp",
+    asset: "serviceAi",
     problem: "Fragmented vendors create fragmented products.",
     solution: "Own the path from interface to backend to launch.",
     technology: "Mobile, web, backend, deployment, documentation.",
@@ -83,6 +84,7 @@ export const metadata = createSeoMetadata({
     "API integration",
     "full stack solutions",
   ],
+  image: socialAssets.pages.services,
 });
 
 export default function ServicesPage() {
@@ -101,11 +103,12 @@ export default function ServicesPage() {
               OpenStair Technologies provides focused engineering support across Flutter, Android, web, backend, API integration, and full stack product delivery.
             </p>
           </div>
-          <VisualPlaceholder
-            assetName="dummy_image_web_service.webp"
-            title="Service architecture"
-            description="Reserved visual for product layers, delivery flow, or service-specific artwork."
+          <BrandImage
+            asset="servicesHero"
+            caption="Service architecture"
+            description="Product layers, delivery flow, and service decisions planned together."
             className="reveal reveal-delay-1"
+            priority
           />
         </div>
       </Section>

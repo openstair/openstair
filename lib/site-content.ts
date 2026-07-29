@@ -19,16 +19,6 @@ export const navLinks = [
   { href: "/about", label: "About" },
 ] as const;
 
-export const footerLinks = [
-  { href: "/services", label: "Services" },
-  { href: "/apps", label: "Applications" },
-  { href: "/docs", label: "Documentation" },
-  { href: "/blog", label: "Blog" },
-  { href: "/open-source", label: "Open Source" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
-] as const;
-
 export const serviceLinks = [
   { href: "/flutter-development", label: "Flutter Development" },
   { href: "/android-development", label: "Android Development" },
@@ -44,11 +34,6 @@ export const resourceLinks = [
   { href: "/blog", label: "Blog" },
   { href: "/apps", label: "Apps Portfolio" },
   { href: "/open-source", label: "Open Source" },
-] as const;
-
-export const legalLinks = [
-  { href: "/docs/legal/privacy-policy-overview", label: "Privacy" },
-  { href: "/docs/legal/terms-overview", label: "Terms" },
 ] as const;
 
 export const platformLinks = [
@@ -71,35 +56,35 @@ export const featureCards = [
     title: "Flutter App Development",
     description:
       "Replace platform sprawl with one polished mobile codebase. Flutter, Dart, APIs, releases. Outcome: faster launches with maintainable app architecture.",
-    assetName: "dummy_image_flutter_service.webp",
+    asset: "serviceFlutter",
   },
   {
     icon: "AN",
     title: "Android App Development",
     description:
       "Native Android apps built for performance, reliability, Play Store readiness, and long-term scalability.",
-    assetName: "dummy_image_flutter_service.webp",
+    asset: "serviceAndroid",
   },
   {
     icon: "WB",
     title: "Web Development",
     description:
       "Turn unclear web presence into a fast product surface. Next.js, React, TypeScript, SEO. Outcome: credible pages and scalable web apps.",
-    assetName: "dummy_image_web_service.webp",
+    asset: "serviceWeb",
   },
   {
     icon: "BE",
     title: "Backend Development",
     description:
       "Stabilize the systems behind your app. Spring Boot, databases, auth, integrations. Outcome: secure APIs ready for product growth.",
-    assetName: "dummy_image_backend_service.webp",
+    asset: "serviceBackend",
   },
   {
     icon: "AI",
     title: "AI-Ready Product Systems",
     description:
       "Prepare workflows for intelligent features. Data flows, APIs, automation, guardrails. Outcome: practical AI capability without fragile experiments.",
-    assetName: "dummy_image_ai_service.webp",
+    asset: "serviceAi",
   },
 ] as const;
 
@@ -122,28 +107,7 @@ export const trustIndicators = [
   {
     value: "Launch",
     label: "Delivery Ownership",
-    detail: "Planning, implementation, release support, and handover clarity.",
-  },
-] as const;
-
-export const engineeringProcess = [
-  {
-    step: "01",
-    title: "Clarify",
-    description:
-      "Define the product goal, operating constraints, users, and technical path before implementation begins.",
-  },
-  {
-    step: "02",
-    title: "Engineer",
-    description:
-      "Build with clear boundaries across presentation, business rules, data access, integrations, and deployment.",
-  },
-  {
-    step: "03",
-    title: "Handover",
-    description:
-      "Prepare the product for launch, documentation, maintenance, and future feature growth.",
+    detail: "Planning, build execution, release support, and handover clarity.",
   },
 ] as const;
 
@@ -154,7 +118,7 @@ export const featuredApps = [
       "Flagship OpenStair application showcase with room for store badges, gallery assets, and future release highlights.",
     href: "/apps",
     label: "View flagship app",
-    assetName: "dummy_image_memory_match_showcase.webp",
+    asset: "memoryMatchKingHero",
   },
 ] as const;
 
@@ -176,7 +140,7 @@ export const openSourceProjects = [
   {
     title: "Reference Applications",
     description:
-      "Small examples document product architecture choices so teams can inspect practical implementation patterns.",
+      "Small examples document product architecture choices so teams can inspect practical delivery patterns.",
     href: "https://github.com/openstair",
     label: "View projects",
   },

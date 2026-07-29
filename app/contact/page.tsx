@@ -1,8 +1,8 @@
 import { Section } from "@/components/layout/section";
 import { SiteShell } from "@/components/layout/site-shell";
+import { BrandImage } from "@/components/ui/brand-image";
 import { ContactForm } from "@/components/ui/contact-form";
 import { ContactIconButton } from "@/components/ui/contact-icon-button";
-import { VisualPlaceholder } from "@/components/ui/visual-placeholder";
 import { getContactGroups } from "@/lib/contact";
 import { createSeoMetadata } from "@/lib/seo";
 
@@ -29,11 +29,12 @@ export default function ContactPage() {
               Share your mobile, web, backend, or full stack development requirements. We usually reply within one business day.
             </p>
           </div>
-          <VisualPlaceholder
-            assetName="dummy_image_contact.webp"
-            title="Consultation"
-            description="Reserved contact visual for project planning, calls, and delivery coordination."
+          <BrandImage
+            asset="contactHero"
+            caption="Consultation"
+            description="Project planning, technical clarity, and delivery coordination from the first conversation."
             className="reveal reveal-delay-1"
+            priority
           />
         </div>
       </Section>
@@ -94,10 +95,10 @@ export default function ContactPage() {
 
       <Section className="py-12 md:py-18">
         <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-          <VisualPlaceholder
-            assetName="dummy_image_consultation.webp"
-            title="Project consultation"
-            description="Reserved visual for discovery calls, technical planning, and delivery alignment."
+          <BrandImage
+            asset="consultation"
+            caption="Project consultation"
+            description="Discovery calls, technical planning, and delivery alignment for serious product work."
             className="reveal"
           />
           <article className="surface-card reveal rounded-3xl p-7 md:p-8">
@@ -106,7 +107,7 @@ export default function ContactPage() {
               Consultation focused on practical next steps.
             </h2>
             <p className="mt-4 text-base leading-8 text-[var(--color-muted)]">
-              We clarify the product goal, target platforms, core risks, and the cleanest delivery path before recommending implementation work.
+              We clarify the product goal, target platforms, core risks, and the cleanest delivery path before recommending the next engineering step.
             </p>
           </article>
         </div>

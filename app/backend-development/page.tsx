@@ -1,4 +1,5 @@
 import { ServiceLanding } from "@/components/ui/service-landing";
+import { socialAssets } from "@/lib/brand-assets";
 import { createSeoMetadata } from "@/lib/seo";
 import { servicePages } from "@/lib/services";
 
@@ -15,6 +16,7 @@ export const metadata = createSeoMetadata({
     "Spring Boot backend",
     "database architecture",
   ],
+  image: socialAssets.pages.services,
 });
 
 export default function BackendDevelopmentPage() {

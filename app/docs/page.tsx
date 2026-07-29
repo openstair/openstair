@@ -6,6 +6,7 @@ import { Breadcrumbs } from "@/features/knowledge/presentation/breadcrumbs";
 import { CollectionCardGrid } from "@/features/knowledge/presentation/collection-card-grid";
 import { DocsShell } from "@/features/knowledge/presentation/docs-shell";
 import { DocumentRenderer } from "@/features/knowledge/presentation/document-renderer";
+import { socialAssets } from "@/lib/brand-assets";
 import { createSeoMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createSeoMetadata({
@@ -13,6 +14,7 @@ export const metadata: Metadata = createSeoMetadata({
   description:
     "OpenStair Knowledge Platform documentation, company knowledge, engineering standards, and architecture decisions.",
   path: "/docs",
+  image: socialAssets.pages.documentation,
 });
 
 export default async function DocsIndexPage() {
@@ -46,9 +48,14 @@ export default async function DocsIndexPage() {
         <div className="mt-6">
           <CollectionCardGrid collections={collections} />
         </div>
-        <Link href="/services" className="btn-secondary mt-8">
-          Explore Services
-        </Link>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Link href="/services" className="btn-secondary">
+            Explore Services
+          </Link>
+          <Link href="/blog" className="btn-secondary">
+            Read Blog
+          </Link>
+        </div>
       </section>
     </DocsShell>
   );

@@ -1,4 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
+import { brandImages, type BrandImageKey } from "@/lib/brand-assets";
 
 type CardGridItem = {
   title: string;
@@ -6,7 +8,7 @@ type CardGridItem = {
   href?: string;
   label?: string;
   icon?: string;
-  assetName?: string;
+  asset?: BrandImageKey;
   problem?: string;
   solution?: string;
   technology?: string;
@@ -33,9 +35,16 @@ export function CardGrid({ items }: CardGridProps) {
             ) : (
               <span className="h-1.5 w-8 rounded-full bg-cyan-500/60" />
             )}
-            {item.assetName ? (
-              <span className="truncate rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[0.68rem] font-semibold text-slate-500">
-                {item.assetName}
+            {item.asset ? (
+              <span className="relative h-12 w-16 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                <Image
+                  src={brandImages[item.asset].src}
+                  alt=""
+                  fill
+                  sizes="4rem"
+                  className="object-cover"
+                  aria-hidden="true"
+                />
               </span>
             ) : null}
           </div>

@@ -64,7 +64,7 @@ export const servicePages = {
       },
       {
         title: "Flutter Development Services",
-        body: "We handle app architecture, UI implementation, API integration, local storage, authentication, state management, performance tuning, testing, and release preparation.",
+        body: "We handle app architecture, interface development, API integration, local storage, authentication, state management, performance tuning, testing, and release preparation.",
       },
       {
         title: "Why Choose Flutter?",
@@ -130,7 +130,7 @@ export const servicePages = {
       },
       {
         title: "SEO-Aware Engineering",
-        body: "We use semantic HTML, metadata, structured data, internal linking, and performance-conscious implementation to help search engines understand your pages.",
+        body: "We use semantic HTML, metadata, structured data, internal linking, and performance-conscious page structure to help search engines understand your pages.",
       },
     ],
     benefits: [

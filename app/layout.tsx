@@ -5,6 +5,7 @@ import {
   siteUrl,
   websiteJsonLd,
 } from "@/lib/seo";
+import { socialAssets } from "@/lib/brand-assets";
 import { AdsenseProvider } from "@/features/advertising/adsense/adsense-provider";
 import "./globals.css";
 
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
     url: siteUrl,
     siteName: companyName,
     locale: "en_US",
-    images: ["/opengraph-image.png"],
+    images: [socialAssets.pages.home],
     type: "website",
   },
   twitter: {
@@ -50,7 +51,7 @@ export const metadata: Metadata = {
     title: "OpenStair Technologies - Software Development Company",
     description:
       "Flutter, Android, web, backend, and full stack application development. Every step matters.",
-    images: ["/opengraph-image.png"],
+    images: [socialAssets.pages.home],
   },
 };
 
