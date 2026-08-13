@@ -43,9 +43,9 @@ export const platformLinks = [
     label: "Play Store",
     icon: "play",
   },
-  { href: "https://www.instagram.com/open.stair", label: "Instagram", icon: "instagram" },
+  { href: "https://www.instagram.com/openstair.in", label: "Instagram", icon: "instagram" },
   { href: "https://www.facebook.com/openstair1", label: "Facebook", icon: "facebook" },
-  { href: "https://www.youtube.com/@open.stair-1", label: "YouTube", icon: "youtube" },
+  { href: "https://www.youtube.com/@openstair1", label: "YouTube", icon: "youtube" },
   { href: "https://www.linkedin.com/company/openstair", label: "LinkedIn", icon: "linkedin" },
   { href: "https://pub.dev/publishers/openstair.in", label: "pub.dev", icon: "pubdev" },
 ] as const;
