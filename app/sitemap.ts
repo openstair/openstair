@@ -1,6 +1,11 @@
 import type { MetadataRoute } from "next";
 import { getKnowledgeService } from "@/features/knowledge/application/knowledge-service";
-import { blogPosts } from "@/lib/blog";
+import {
+  getAllCategories,
+  getAllPosts,
+  getPaginatedPosts,
+  getPostsByCategory,
+} from "@/lib/blog";
 import { siteUrl } from "@/lib/seo";
 
 const staticRoutes = [
@@ -25,12 +30,45 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: route === "/blog" ? "weekly" : "monthly",
     priority: route === "" ? 1 : route === "/services" ? 0.9 : 0.8,
   }));
-  const blogEntries: MetadataRoute.Sitemap = blogPosts.map((post) => ({
+  const posts = getAllPosts();
+  const blogEntries: MetadataRoute.Sitemap = posts.map((post) => ({
     url: `${siteUrl}/blog/${post.slug}`,
-    lastModified: new Date(post.date),
+    lastModified: new Date(post.updated ?? post.date),
     changeFrequency: "monthly",
     priority: 0.7,
   }));
+  const rootPagination = getPaginatedPosts(posts, 1);
+  const blogPaginationEntries: MetadataRoute.Sitemap =
+    rootPagination && rootPagination.totalPages > 1
+      ? Array.from({ length: rootPagination.totalPages - 1 }, (_, index) => ({
+          url: `${siteUrl}/blog/page/${index + 2}`,
+          lastModified,
+          changeFrequency: "weekly" as const,
+          priority: 0.5,
+        }))
+      : [];
+  const categoryEntries: MetadataRoute.Sitemap = getAllCategories().flatMap((category) => {
+    const paginatedCategory = getPaginatedPosts(getPostsByCategory(category.slug), 1);
+    const archiveEntries: MetadataRoute.Sitemap = [
+      {
+        url: `${siteUrl}/blog/${category.slug}`,
+        lastModified,
+        changeFrequency: "weekly",
+        priority: 0.6,
+      },
+    ];
+    const paginationEntries: MetadataRoute.Sitemap =
+      paginatedCategory && paginatedCategory.totalPages > 1
+        ? Array.from({ length: paginatedCategory.totalPages - 1 }, (_, index) => ({
+            url: `${siteUrl}/blog/${category.slug}/page/${index + 2}`,
+            lastModified,
+            changeFrequency: "weekly" as const,
+            priority: 0.4,
+          }))
+        : [];
+
+    return [...archiveEntries, ...paginationEntries];
+  });
   const docsEntries: MetadataRoute.Sitemap = (
     await getKnowledgeService().listPublicDocuments()
   ).map((document) => ({
@@ -40,5 +78,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: document.slug === "" ? 0.8 : 0.6,
   }));
 
-  return [...staticEntries, ...blogEntries, ...docsEntries];
+  return [
+    ...staticEntries,
+    ...blogEntries,
+    ...blogPaginationEntries,
+    ...categoryEntries,
+    ...docsEntries,
+  ];
 }

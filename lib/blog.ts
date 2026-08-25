@@ -1,266 +1,652 @@
-import type { BrandImageKey } from "@/lib/brand-assets";
+import "server-only";
+
+import fs from "node:fs";
+import path from "node:path";
+import { cache } from "react";
+import matter from "gray-matter";
+import { brandLogos } from "@/lib/brand-assets";
+import { companyName, siteUrl } from "@/lib/seo";
+
+export const BLOG_POSTS_PER_PAGE = 6;
+
+const blogContentDirectory = path.join(process.cwd(), "content", "blog");
+const reservedBlogSegments = new Set(["page", "rss.xml"]);
+
+type FrontmatterLink = {
+  href: string;
+  label: string;
+};
+
+type BlogFrontmatter = {
+  title: string;
+  description: string;
+  slug: string;
+  date: string;
+  updated?: string;
+  category: string;
+  tags?: string[];
+  author: string;
+  image?: string;
+  imageAlt?: string;
+  internalLinks?: FrontmatterLink[];
+};
+
+export type BlogCategory = {
+  name: string;
+  slug: string;
+  description: string;
+  count: number;
+};
 
 export type BlogPost = {
   slug: string;
   title: string;
   description: string;
   date: string;
-  readTime: string;
+  updated?: string;
+  category: BlogCategory;
   tags: string[];
-  heroAsset: BrandImageKey;
-  internalLinks: {
-    href: string;
-    label: string;
-  }[];
-  sections: {
-    heading: string;
-    body: string;
-  }[];
+  author: string;
+  image?: string;
+  imageAlt?: string;
+  internalLinks: FrontmatterLink[];
+  content: string;
+  excerpt: string;
+  readTime: string;
+  sourcePath: string;
+  searchText: string;
 };
 
-export const blogPosts: BlogPost[] = [
-  {
-    slug: "flutter-clean-architecture",
-    title: "Flutter Clean Architecture for Maintainable Mobile Apps",
-    description:
-      "How feature boundaries, domain rules, and disciplined state management keep Flutter apps ready for real product growth.",
-    date: "2026-01-15",
-    readTime: "6 min read",
-    tags: ["Flutter", "Architecture", "Engineering"],
-    heroAsset: "serviceFlutter",
-    internalLinks: [
-      { href: "/flutter-development", label: "Flutter Development" },
-      { href: "/docs/company/engineering-philosophy", label: "Engineering Philosophy" },
-    ],
-    sections: [
-      {
-        heading: "Architecture Protects Product Speed",
-        body: "Flutter helps teams move quickly, but speed only compounds when the codebase stays understandable. Clear feature boundaries keep UI, business decisions, data access, and platform services from collapsing into one hard-to-change layer.",
-      },
-      {
-        heading: "A Practical Layering Model",
-        body: "OpenStair favors presentation, domain, and data layers where the product needs them. Smaller releases stay lightweight, while systems with authentication, payments, offline behavior, or role-based workflows get stronger boundaries and testable use cases.",
-      },
-      {
-        heading: "What Businesses Gain",
-        body: "Clean architecture reduces regression risk, makes onboarding easier, and lets future features attach to known seams in the product. That matters when a mobile app becomes a long-term channel rather than a launch experiment.",
-      },
-    ],
-  },
-  {
-    slug: "flutter-performance-production-apps",
-    title: "Flutter Performance Habits for Production Apps",
-    description:
-      "Performance work in Flutter is less about tricks and more about build discipline, rendering awareness, and predictable data flow.",
-    date: "2026-02-03",
-    readTime: "5 min read",
-    tags: ["Flutter", "Performance", "Mobile"],
-    heroAsset: "memoryMatchKingDeviceMockup",
-    internalLinks: [
-      { href: "/apps", label: "Applications" },
-      { href: "/flutter-development", label: "Flutter Development" },
-    ],
-    sections: [
-      {
-        heading: "Performance Starts Before Profiling",
-        body: "A fast app usually begins with simple widget trees, controlled rebuilds, clear loading states, and data models that do not force the interface to guess. Profiling is important, but it works best after the structure is already clean.",
-      },
-      {
-        heading: "Design for Real Devices",
-        body: "Production Flutter apps should be checked on mid-range devices, slow networks, and dense content screens. Smooth animation on a developer machine is not enough evidence for a reliable customer experience.",
-      },
-      {
-        heading: "Keep Measurement Close",
-        body: "OpenStair treats performance as a release habit. We watch image sizes, app startup, API latency, rebuild hot spots, and navigation flow so quality remains visible throughout development.",
-      },
-    ],
-  },
-  {
-    slug: "building-production-mobile-apps",
-    title: "Building Production Apps Beyond the First Release",
-    description:
-      "A production app needs release planning, observability, support paths, and technical choices that keep the product operable after launch.",
-    date: "2026-02-18",
-    readTime: "6 min read",
-    tags: ["Mobile", "Engineering", "Company"],
-    heroAsset: "applicationsHero",
-    internalLinks: [
-      { href: "/apps", label: "Applications" },
-      { href: "/services", label: "Services" },
-    ],
-    sections: [
-      {
-        heading: "Launch Is a System",
-        body: "The first store release is only one part of production readiness. Teams need versioning, error handling, analytics, support workflows, and a clear plan for how changes reach users without creating avoidable risk.",
-      },
-      {
-        heading: "Product Decisions Become Engineering Decisions",
-        body: "Authentication, onboarding, notifications, payments, and content updates all affect architecture. Treating them as isolated features creates brittle apps; planning them as product systems creates room to grow.",
-      },
-      {
-        heading: "How OpenStair Works",
-        body: "OpenStair builds mobile products with release ownership in mind: stable foundations, documented decisions, and handover notes that help the product remain understandable after delivery.",
-      },
-    ],
-  },
-  {
-    slug: "backend-architecture-mobile-web",
-    title: "Backend Architecture for Mobile and Web Products",
-    description:
-      "Strong backend architecture gives apps stable data, clear permissions, reliable integrations, and room for future product workflows.",
-    date: "2026-03-05",
-    readTime: "7 min read",
-    tags: ["Backend", "Architecture", "Security"],
-    heroAsset: "serviceBackend",
-    internalLinks: [
-      { href: "/backend-development", label: "Backend Development" },
-      { href: "/services", label: "Services" },
-    ],
-    sections: [
-      {
-        heading: "The Backend Carries Product Rules",
-        body: "Mobile and web interfaces should not be forced to reconstruct business logic from scattered endpoints. A dependable backend gives the product a single place for rules, permissions, validation, and long-running workflow decisions.",
-      },
-      {
-        heading: "Design Around Boundaries",
-        body: "Good backend systems separate API contracts, domain behavior, persistence, integrations, and operational concerns. That separation makes change safer when the product adds new clients, user roles, or partner systems.",
-      },
-      {
-        heading: "Build for Operation",
-        body: "A backend is not finished when endpoints return data. It needs logs, meaningful errors, deployment clarity, migration discipline, and documentation that lets the system be maintained with confidence.",
-      },
-    ],
-  },
-  {
-    slug: "software-documentation-that-ships",
-    title: "Software Documentation That Actually Ships With the Product",
-    description:
-      "Documentation should capture decisions, constraints, and operating knowledge without slowing the engineering team down.",
-    date: "2026-03-22",
-    readTime: "5 min read",
-    tags: ["Documentation", "Engineering", "Architecture"],
-    heroAsset: "documentationHero",
-    internalLinks: [
-      { href: "/docs", label: "Documentation" },
-      { href: "/docs/processes/documentation-authoring", label: "Authoring Process" },
-    ],
-    sections: [
-      {
-        heading: "Documentation Is Product Infrastructure",
-        body: "Useful documentation explains why the system exists, how key decisions were made, and where future changes should happen. It reduces dependency on memory and makes the product easier to operate.",
-      },
-      {
-        heading: "Write the Right Level",
-        body: "Teams do not need endless documents. They need concise architecture notes, service references, onboarding guides, API behavior, and release decisions that stay close to the code and product workflow.",
-      },
-      {
-        heading: "Knowledge Transfer Is Delivery",
-        body: "OpenStair treats handover as part of engineering quality. A product is stronger when the client can understand its structure, risks, and next steps without reverse-engineering every decision.",
-      },
-    ],
-  },
-  {
-    slug: "knowledge-platform-for-engineering-teams",
-    title: "Why Engineering Teams Need a Knowledge Platform",
-    description:
-      "A lightweight knowledge platform helps companies keep service thinking, product decisions, and reusable business assets aligned.",
-    date: "2026-04-08",
-    readTime: "6 min read",
-    tags: ["Documentation", "Knowledge Platform", "Company"],
-    heroAsset: "documentationHero",
-    internalLinks: [
-      { href: "/docs", label: "Knowledge Platform" },
-      { href: "/docs/engineering/documentation-guidelines", label: "Documentation Guidelines" },
-    ],
-    sections: [
-      {
-        heading: "Knowledge Gets Fragmented Quickly",
-        body: "As products grow, important decisions spread across chat, documents, tickets, and code comments. A knowledge platform gives teams a maintained place for business context, engineering standards, and reusable material.",
-      },
-      {
-        heading: "Governance Keeps It Useful",
-        body: "Documentation only works when it is searchable, current, and clearly owned. OpenStair’s Knowledge Platform keeps public company material, service references, and governance checks connected.",
-      },
-      {
-        heading: "Better Context Improves Delivery",
-        body: "When teams can find the right background quickly, they make better technical decisions. That is especially valuable for long-term partnerships where product context matters as much as implementation detail.",
-      },
-    ],
-  },
-  {
-    slug: "open-source-engineering-principles",
-    title: "Open Source Engineering as a Product Discipline",
-    description:
-      "Reusable packages and public engineering notes turn repeated product lessons into tools that benefit future projects.",
-    date: "2026-04-26",
-    readTime: "5 min read",
-    tags: ["Open Source", "Engineering", "Flutter"],
-    heroAsset: "openSourceHero",
-    internalLinks: [
-      { href: "/open-source", label: "Open Source" },
-      { href: "https://github.com/openstair", label: "GitHub" },
-    ],
-    sections: [
-      {
-        heading: "Reuse Should Be Earned",
-        body: "Open source work is strongest when it comes from real repeated needs. A package, tool, or reference pattern should clarify a problem instead of adding abstraction for its own sake.",
-      },
-      {
-        heading: "Good Public Work Raises Internal Quality",
-        body: "Preparing code or documentation for public use forces cleaner naming, sharper boundaries, and better examples. Those habits improve private client work as well.",
-      },
-      {
-        heading: "OpenStair's Commitment",
-        body: "OpenStair contributes Flutter packages, engineering tools, documentation, and libraries back to the community whenever a reusable pattern can help other builders without compromising client trust.",
-      },
-    ],
-  },
-  {
-    slug: "why-flutter-for-businesses",
-    title: "Why Flutter Works for Business Mobile Products",
-    description:
-      "Flutter is a strong choice when a business needs polished mobile UX, consistent behavior, and a practical path across platforms.",
-    date: "2026-05-14",
-    readTime: "6 min read",
-    tags: ["Flutter", "Business", "Mobile"],
-    heroAsset: "serviceFlutter",
-    internalLinks: [
-      { href: "/flutter-development", label: "Flutter Services" },
-      { href: "/contact", label: "Book Consultation" },
-    ],
-    sections: [
-      {
-        heading: "One Product Experience Across Platforms",
-        body: "Businesses often need Android and iOS experiences that feel consistent without paying for two disconnected product efforts. Flutter can support that goal while still leaving room for platform-specific polish.",
-      },
-      {
-        heading: "Fast Iteration With Strong UI Control",
-        body: "Flutter gives teams a productive development loop and a precise interface toolkit. That combination is useful when a product needs to learn from users quickly without sacrificing visual quality.",
-      },
-      {
-        heading: "The Right Fit Still Matters",
-        body: "Flutter is not a magic answer for every application. OpenStair evaluates product requirements, native integrations, release plans, and long-term maintenance before recommending the stack.",
-      },
-    ],
-  },
-];
+export type BlogPostSummary = Omit<
+  BlogPost,
+  "content" | "sourcePath" | "searchText"
+> & {
+  searchText?: string;
+};
 
-export function getBlogPost(slug: string) {
-  return blogPosts.find((post) => post.slug === slug);
+export type PaginatedPosts = {
+  posts: BlogPostSummary[];
+  currentPage: number;
+  totalPages: number;
+  totalPosts: number;
+  previousPage: number | undefined;
+  nextPage: number | undefined;
+};
+
+export type AdjacentBlogPosts = {
+  previous: BlogPostSummary | undefined;
+  next: BlogPostSummary | undefined;
+};
+
+type ParsedBlogPost = Omit<BlogPost, "category"> & {
+  categoryName: string;
+};
+
+export const getAllPosts = cache((): BlogPost[] => {
+  const files = listBlogContentFiles();
+  const parsedPosts = files.map(parseBlogFile);
+  const duplicateSlugDiagnostics = findDuplicateValues(
+    parsedPosts.map((post) => ({
+      value: post.slug,
+      sourcePath: post.sourcePath,
+      label: "slug",
+    })),
+  );
+
+  if (duplicateSlugDiagnostics.length > 0) {
+    throw new Error(formatBlogValidationError(duplicateSlugDiagnostics));
+  }
+
+  const categoryCounts = countCategories(parsedPosts);
+  const categories = new Map(
+    [...categoryCounts.entries()].map(([name, count]) => [
+      name,
+      {
+        name,
+        slug: slugifyCategory(name),
+        description: getCategoryDescription(name),
+        count,
+      },
+    ]),
+  );
+  const categorySlugDiagnostics = findDuplicateValues(
+    [...categories.values()].map((category) => ({
+      value: category.slug,
+      sourcePath: `category:${category.name}`,
+      label: "category slug",
+    })),
+  );
+  const routeConflictDiagnostics = parsedPosts
+    .filter((post) => reservedBlogSegments.has(post.slug))
+    .map(
+      (post) =>
+        `${post.sourcePath}\nInvalid slug: "${post.slug}" is reserved by the Blog router`,
+    );
+  const categoryRouteConflictDiagnostics = [...categories.values()]
+    .filter((category) => reservedBlogSegments.has(category.slug))
+    .map(
+      (category) =>
+        `category:${category.name}\nInvalid category: "${category.name}" resolves to reserved route segment "${category.slug}"`,
+    );
+  const articleCategoryConflictDiagnostics = parsedPosts.flatMap((post) => {
+    const category = categories.get(post.categoryName);
+
+    if (!category || category.slug !== post.slug) {
+      return [];
+    }
+
+    return [
+      `${post.sourcePath}\nRoute conflict: article slug "${post.slug}" conflicts with category route /blog/${category.slug}`,
+    ];
+  });
+
+  const diagnostics = [
+    ...categorySlugDiagnostics,
+    ...routeConflictDiagnostics,
+    ...categoryRouteConflictDiagnostics,
+    ...articleCategoryConflictDiagnostics,
+  ];
+
+  if (diagnostics.length > 0) {
+    throw new Error(formatBlogValidationError(diagnostics));
+  }
+
+  return parsedPosts
+    .map<BlogPost>((post) => {
+      const category = categories.get(post.categoryName);
+
+      if (!category) {
+        throw new Error(
+          formatBlogValidationError([
+            `${post.sourcePath}\nInvalid category: "${post.categoryName}"`,
+          ]),
+        );
+      }
+
+      return {
+        ...post,
+        category,
+      };
+    })
+    .sort(comparePostsNewestFirst);
+});
+
+export function getBlogPost(slug: string): BlogPost | undefined {
+  return getAllPosts().find((post) => post.slug === slug);
 }
 
-export function getRelatedPosts(post: BlogPost, limit = 3) {
-  return blogPosts
+export function getAllPostSummaries({
+  includeSearchText = false,
+} = {}): BlogPostSummary[] {
+  return getAllPosts().map((post) => toPostSummary(post, includeSearchText));
+}
+
+export function getAllCategories(): BlogCategory[] {
+  return [
+    ...new Map(
+      getAllPosts().map((post) => [post.category.slug, post.category]),
+    ).values(),
+  ].sort((left, right) => left.name.localeCompare(right.name));
+}
+
+export function getCategoryBySlug(slug: string): BlogCategory | undefined {
+  return getAllCategories().find((category) => category.slug === slug);
+}
+
+export function getPostsByCategory(categorySlug: string): BlogPostSummary[] {
+  return getAllPosts()
+    .filter((post) => post.category.slug === categorySlug)
+    .map((post) => toPostSummary(post));
+}
+
+export function getPaginatedPosts(
+  posts: BlogPostSummary[],
+  page: number,
+  pageSize = BLOG_POSTS_PER_PAGE,
+): PaginatedPosts | undefined {
+  const totalPosts = posts.length;
+  const totalPages = Math.max(1, Math.ceil(totalPosts / pageSize));
+
+  if (!Number.isInteger(page) || page < 1 || page > totalPages || totalPosts === 0) {
+    return undefined;
+  }
+
+  const startIndex = (page - 1) * pageSize;
+
+  return {
+    posts: posts.slice(startIndex, startIndex + pageSize),
+    currentPage: page,
+    totalPages,
+    totalPosts,
+    previousPage: page > 1 ? page - 1 : undefined,
+    nextPage: page < totalPages ? page + 1 : undefined,
+  };
+}
+
+export function getRelatedPosts(post: BlogPost, limit = 3): BlogPostSummary[] {
+  return getAllPosts()
     .filter((item) => item.slug !== post.slug)
     .map((item) => ({
       post: item,
-      score: item.tags.filter((tag) => post.tags.includes(tag)).length,
+      score:
+        (item.category.slug === post.category.slug ? 4 : 0) +
+        item.tags.filter((tag) => post.tags.includes(tag)).length,
     }))
-    .sort((left, right) => right.score - left.score || right.post.date.localeCompare(left.post.date))
+    .filter((item) => item.score > 0)
+    .sort(
+      (left, right) =>
+        right.score - left.score || comparePostsNewestFirst(left.post, right.post),
+    )
     .slice(0, limit)
-    .map((item) => item.post);
+    .map((item) => toPostSummary(item.post));
 }
 
-export function getBlogTopics() {
-  return ["Flutter", "Architecture", "Backend", "Engineering", "Open Source", "Documentation", "Company"];
+export function getAdjacentPosts(post: BlogPost): AdjacentBlogPosts {
+  const posts = getAllPosts();
+  const currentIndex = posts.findIndex((item) => item.slug === post.slug);
+
+  return {
+    previous: currentIndex > 0 ? toPostSummary(posts[currentIndex - 1]) : undefined,
+    next:
+      currentIndex >= 0 && currentIndex < posts.length - 1
+        ? toPostSummary(posts[currentIndex + 1])
+        : undefined,
+  };
+}
+
+export function getBlogSearchIndex() {
+  return getAllPosts().map((post) => ({
+    slug: post.slug,
+    title: post.title,
+    description: post.description,
+    date: post.date,
+    category: post.category,
+    tags: post.tags,
+    author: post.author,
+    readTime: post.readTime,
+    excerpt: post.excerpt,
+    searchText: post.searchText,
+  }));
+}
+
+export function getArticleJsonLd(post: BlogPost) {
+  return removeUndefinedValues({
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.description,
+    image: post.image ? `${siteUrl}${post.image}` : undefined,
+    datePublished: post.date,
+    dateModified: post.updated ?? post.date,
+    author: {
+      "@type": "Organization",
+      name: post.author,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: companyName,
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}${brandLogos.mark.src}`,
+      },
+    },
+    mainEntityOfPage: `${siteUrl}/blog/${post.slug}`,
+  });
+}
+
+function listBlogContentFiles() {
+  if (!fs.existsSync(blogContentDirectory)) {
+    return [];
+  }
+
+  return fs
+    .readdirSync(blogContentDirectory)
+    .filter((fileName) => fileName.endsWith(".mdx"))
+    .sort()
+    .map((fileName) => path.join(blogContentDirectory, fileName));
+}
+
+function parseBlogFile(filePath: string): ParsedBlogPost {
+  const content = fs.readFileSync(filePath, "utf8");
+  const parsed = matter(content);
+  const sourcePath = path.relative(process.cwd(), filePath);
+  const frontmatter = validateFrontmatter(parsed.data, sourcePath);
+  const plainText = markdownToPlainText(parsed.content);
+
+  return {
+    ...frontmatter,
+    tags: frontmatter.tags ?? [],
+    internalLinks: frontmatter.internalLinks ?? [],
+    content: parsed.content.trim(),
+    excerpt: plainText.slice(0, 220),
+    readTime: calculateReadTime(plainText),
+    sourcePath,
+    searchText: [
+      frontmatter.title,
+      frontmatter.description,
+      frontmatter.category,
+      ...(frontmatter.tags ?? []),
+      plainText,
+    ]
+      .join(" ")
+      .toLowerCase(),
+    categoryName: frontmatter.category,
+  };
+}
+
+function validateFrontmatter(
+  value: Record<string, unknown>,
+  sourcePath: string,
+): BlogFrontmatter {
+  const diagnostics: string[] = [];
+  const title = requireString(value.title, "title", sourcePath, diagnostics);
+  const description = requireString(value.description, "description", sourcePath, diagnostics);
+  const slug = requireString(value.slug, "slug", sourcePath, diagnostics);
+  const date = requireDate(value.date, "date", sourcePath, diagnostics);
+  const updated = optionalDate(value.updated, "updated", sourcePath, diagnostics);
+  const category = requireString(value.category, "category", sourcePath, diagnostics);
+  const author = requireString(value.author, "author", sourcePath, diagnostics);
+  const image = optionalPublicPath(value.image, "image", sourcePath, diagnostics);
+  const imageAlt = optionalString(value.imageAlt, "imageAlt", sourcePath, diagnostics);
+  const tags = optionalStringArray(value.tags, "tags", sourcePath, diagnostics);
+  const internalLinks = optionalLinks(value.internalLinks, sourcePath, diagnostics);
+
+  if (slug && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
+    diagnostics.push(
+      `${sourcePath}\nInvalid slug: "${slug}" must be lowercase kebab-case`,
+    );
+  }
+
+  if (category && !slugifyCategory(category)) {
+    diagnostics.push(`${sourcePath}\nInvalid category: category must contain letters or numbers`);
+  }
+
+  if (updated && date && updated < date) {
+    diagnostics.push(
+      `${sourcePath}\nInvalid updated date: updated cannot be earlier than date`,
+    );
+  }
+
+  if (image && !fs.existsSync(path.join(process.cwd(), "public", image))) {
+    diagnostics.push(`${sourcePath}\nInvalid image: public asset not found at ${image}`);
+  }
+
+  if (image && !imageAlt) {
+    diagnostics.push(
+      `${sourcePath}\nMissing required field: imageAlt is required when image is set`,
+    );
+  }
+
+  if (diagnostics.length > 0) {
+    throw new Error(formatBlogValidationError(diagnostics));
+  }
+
+  return {
+    title,
+    description,
+    slug,
+    date,
+    updated,
+    category,
+    author,
+    image,
+    imageAlt,
+    tags,
+    internalLinks,
+  };
+}
+
+function requireString(
+  value: unknown,
+  fieldName: string,
+  sourcePath: string,
+  diagnostics: string[],
+) {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    diagnostics.push(`${sourcePath}\nMissing required field: ${fieldName}`);
+    return "";
+  }
+
+  return value.trim();
+}
+
+function optionalString(
+  value: unknown,
+  fieldName: string,
+  sourcePath: string,
+  diagnostics: string[],
+) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (typeof value !== "string" || value.trim().length === 0) {
+    diagnostics.push(`${sourcePath}\nInvalid field: ${fieldName} must be a non-empty string`);
+    return undefined;
+  }
+
+  return value.trim();
+}
+
+function requireDate(
+  value: unknown,
+  fieldName: string,
+  sourcePath: string,
+  diagnostics: string[],
+) {
+  const parsed = optionalDate(value, fieldName, sourcePath, diagnostics);
+
+  if (!parsed) {
+    diagnostics.push(`${sourcePath}\nMissing required field: ${fieldName}`);
+  }
+
+  return parsed ?? "";
+}
+
+function optionalDate(
+  value: unknown,
+  fieldName: string,
+  sourcePath: string,
+  diagnostics: string[],
+) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (value instanceof Date) {
+    return formatDate(value);
+  }
+
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    diagnostics.push(`${sourcePath}\nInvalid field: ${fieldName} must be YYYY-MM-DD`);
+    return undefined;
+  }
+
+  const parsedDate = new Date(`${value}T00:00:00.000Z`);
+
+  if (Number.isNaN(parsedDate.getTime()) || formatDate(parsedDate) !== value) {
+    diagnostics.push(`${sourcePath}\nInvalid date: ${fieldName} is not a real calendar date`);
+    return undefined;
+  }
+
+  return value;
+}
+
+function optionalPublicPath(
+  value: unknown,
+  fieldName: string,
+  sourcePath: string,
+  diagnostics: string[],
+) {
+  const publicPath = optionalString(value, fieldName, sourcePath, diagnostics);
+
+  if (publicPath && !publicPath.startsWith("/")) {
+    diagnostics.push(`${sourcePath}\nInvalid field: ${fieldName} must start with "/"`);
+  }
+
+  return publicPath;
+}
+
+function optionalStringArray(
+  value: unknown,
+  fieldName: string,
+  sourcePath: string,
+  diagnostics: string[],
+) {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (
+    !Array.isArray(value) ||
+    value.some((item) => typeof item !== "string" || !item.trim())
+  ) {
+    diagnostics.push(`${sourcePath}\nInvalid field: ${fieldName} must be a list of strings`);
+    return undefined;
+  }
+
+  return value.map((item) => item.trim());
+}
+
+function optionalLinks(
+  value: unknown,
+  sourcePath: string,
+  diagnostics: string[],
+): FrontmatterLink[] | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+
+  if (
+    !Array.isArray(value) ||
+    value.some(
+      (item) =>
+        typeof item !== "object" ||
+        item === null ||
+        typeof (item as FrontmatterLink).href !== "string" ||
+        typeof (item as FrontmatterLink).label !== "string" ||
+        !(item as FrontmatterLink).href.trim() ||
+        !(item as FrontmatterLink).label.trim(),
+    )
+  ) {
+    diagnostics.push(
+      `${sourcePath}\nInvalid field: internalLinks must be a list of { href, label } objects`,
+    );
+    return undefined;
+  }
+
+  return value.map((item) => ({
+    href: (item as FrontmatterLink).href.trim(),
+    label: (item as FrontmatterLink).label.trim(),
+  }));
+}
+
+function countCategories(posts: ParsedBlogPost[]) {
+  return posts.reduce<Map<string, number>>((counts, post) => {
+    counts.set(post.categoryName, (counts.get(post.categoryName) ?? 0) + 1);
+
+    return counts;
+  }, new Map());
+}
+
+function findDuplicateValues(
+  values: { value: string; sourcePath: string; label: string }[],
+) {
+  const byValue = values.reduce<Map<string, typeof values>>((map, item) => {
+    map.set(item.value, [...(map.get(item.value) ?? []), item]);
+
+    return map;
+  }, new Map());
+
+  return [...byValue.entries()].flatMap(([value, entries]) => {
+    if (entries.length < 2) {
+      return [];
+    }
+
+    return entries.map(
+      (entry) => `${entry.sourcePath}\nDuplicate ${entry.label}: "${value}"`,
+    );
+  });
+}
+
+function comparePostsNewestFirst(
+  left: Pick<BlogPost, "date" | "title">,
+  right: Pick<BlogPost, "date" | "title">,
+) {
+  return right.date.localeCompare(left.date) || left.title.localeCompare(right.title);
+}
+
+function toPostSummary(post: BlogPost, includeSearchText = false): BlogPostSummary {
+  return {
+    slug: post.slug,
+    title: post.title,
+    description: post.description,
+    date: post.date,
+    updated: post.updated,
+    category: post.category,
+    tags: post.tags,
+    author: post.author,
+    image: post.image,
+    imageAlt: post.imageAlt,
+    internalLinks: post.internalLinks,
+    excerpt: post.excerpt,
+    readTime: post.readTime,
+    ...(includeSearchText ? { searchText: post.searchText } : {}),
+  };
+}
+
+export function slugifyCategory(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function getCategoryDescription(category: string) {
+  const descriptions: Record<string, string> = {
+    Backend:
+      "Backend architecture, APIs, security, and operations for dependable software products.",
+    Documentation:
+      "Practical documentation and knowledge platform guidance for engineering teams.",
+    Flutter:
+      "Flutter architecture, performance, and product engineering guidance for production apps.",
+    Mobile: "Mobile product delivery, release readiness, and maintainable app engineering.",
+    "Open Source": "Open source practices, reusable engineering assets, and public product discipline.",
+  };
+
+  return descriptions[category] ?? `Practical ${category} articles from OpenStair Engineering.`;
+}
+
+function calculateReadTime(text: string) {
+  const words = text.split(/\s+/).filter(Boolean).length;
+  const minutes = Math.max(1, Math.ceil(words / 220));
+
+  return `${minutes} min read`;
+}
+
+function markdownToPlainText(markdown: string) {
+  return markdown
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/!\[([^\]]*)\]\([^)]+\)/g, "$1")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/[#>*_|~-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function formatDate(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function formatBlogValidationError(diagnostics: string[]) {
+  return `Blog validation error:\n${diagnostics.join("\n\n")}`;
+}
+
+function removeUndefinedValues(value: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, entryValue]) => entryValue !== undefined),
+  );
 }

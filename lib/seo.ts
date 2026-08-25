@@ -10,6 +10,10 @@ type SeoMetadataInput = {
   path: string;
   keywords?: string[];
   image?: string;
+  type?: "website" | "article";
+  publishedTime?: string;
+  modifiedTime?: string;
+  authors?: string[];
 };
 
 export function createSeoMetadata({
@@ -18,6 +22,10 @@ export function createSeoMetadata({
   path,
   keywords,
   image,
+  type = "website",
+  publishedTime,
+  modifiedTime,
+  authors,
 }: SeoMetadataInput): Metadata {
   const url = new URL(path, siteUrl).toString();
   const openGraphImage = image ?? socialAssets.defaultOpenGraph;
@@ -40,9 +48,12 @@ export function createSeoMetadata({
           width: 1200,
           height: 630,
           alt: `${companyName} social sharing image`,
-        },
-      ],
-      type: "website",
+      },
+    ],
+      type,
+      publishedTime,
+      modifiedTime,
+      authors,
     },
     twitter: {
       card: "summary_large_image",
