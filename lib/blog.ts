@@ -5,6 +5,11 @@ import path from "node:path";
 import { cache } from "react";
 import matter from "gray-matter";
 import { brandLogos } from "@/lib/brand-assets";
+import {
+  getBlogImageSourceKind,
+  getBlogImageValidationDiagnostic,
+  toAbsoluteBlogImageUrl,
+} from "@/lib/blog-images";
 import { companyName, siteUrl } from "@/lib/seo";
 
 export const BLOG_POSTS_PER_PAGE = 6;
@@ -275,7 +280,7 @@ export function getArticleJsonLd(post: BlogPost) {
     "@type": "Article",
     headline: post.title,
     description: post.description,
-    image: post.image ? `${siteUrl}${post.image}` : undefined,
+    image: post.image ? toAbsoluteBlogImageUrl(post.image, siteUrl) : undefined,
     datePublished: post.date,
     dateModified: post.updated ?? post.date,
     author: {
@@ -346,7 +351,7 @@ function validateFrontmatter(
   const updated = optionalDate(value.updated, "updated", sourcePath, diagnostics);
   const category = requireString(value.category, "category", sourcePath, diagnostics);
   const author = requireString(value.author, "author", sourcePath, diagnostics);
-  const image = optionalPublicPath(value.image, "image", sourcePath, diagnostics);
+  const image = optionalBlogImage(value.image, "image", sourcePath, diagnostics);
   const imageAlt = optionalString(value.imageAlt, "imageAlt", sourcePath, diagnostics);
   const tags = optionalStringArray(value.tags, "tags", sourcePath, diagnostics);
   const internalLinks = optionalLinks(value.internalLinks, sourcePath, diagnostics);
@@ -365,10 +370,6 @@ function validateFrontmatter(
     diagnostics.push(
       `${sourcePath}\nInvalid updated date: updated cannot be earlier than date`,
     );
-  }
-
-  if (image && !fs.existsSync(path.join(process.cwd(), "public", image))) {
-    diagnostics.push(`${sourcePath}\nInvalid image: public asset not found at ${image}`);
   }
 
   if (image && !imageAlt) {
@@ -472,19 +473,56 @@ function optionalDate(
   return value;
 }
 
-function optionalPublicPath(
+function optionalBlogImage(
   value: unknown,
   fieldName: string,
   sourcePath: string,
   diagnostics: string[],
 ) {
-  const publicPath = optionalString(value, fieldName, sourcePath, diagnostics);
+  const image = optionalString(value, fieldName, sourcePath, diagnostics);
 
-  if (publicPath && !publicPath.startsWith("/")) {
-    diagnostics.push(`${sourcePath}\nInvalid field: ${fieldName} must start with "/"`);
+  if (!image) {
+    return image;
   }
 
-  return publicPath;
+  const imageDiagnostic = getBlogImageValidationDiagnostic(image, fieldName);
+
+  if (imageDiagnostic) {
+    diagnostics.push(`${sourcePath}\n${imageDiagnostic}`);
+    return image;
+  }
+
+  if (getBlogImageSourceKind(image) === "local") {
+    const publicAssetPath = resolvePublicAssetPath(image);
+
+    if (!publicAssetPath) {
+      diagnostics.push(
+        `${sourcePath}\nInvalid ${fieldName}: local public asset path must resolve inside public/`,
+      );
+    } else if (
+      !fs.existsSync(publicAssetPath) ||
+      !fs.statSync(publicAssetPath).isFile()
+    ) {
+      diagnostics.push(`${sourcePath}\nInvalid ${fieldName}: public asset not found at ${image}`);
+    }
+  }
+
+  return image;
+}
+
+function resolvePublicAssetPath(image: string) {
+  const publicDirectory = path.resolve(process.cwd(), "public");
+  const publicAssetPath = path.resolve(publicDirectory, `.${image}`);
+  const publicDirectoryWithSeparator = `${publicDirectory}${path.sep}`;
+
+  if (
+    publicAssetPath !== publicDirectory &&
+    !publicAssetPath.startsWith(publicDirectoryWithSeparator)
+  ) {
+    return undefined;
+  }
+
+  return publicAssetPath;
 }
 
 function optionalStringArray(

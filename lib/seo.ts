@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { brandLogos, socialAssets } from "@/lib/brand-assets";
+import { toAbsoluteBlogImageUrl } from "@/lib/blog-images";
 
 export const siteUrl = "https://openstair.in";
 export const companyName = "OpenStair Technologies";
@@ -28,7 +29,9 @@ export function createSeoMetadata({
   authors,
 }: SeoMetadataInput): Metadata {
   const url = new URL(path, siteUrl).toString();
-  const openGraphImage = image ?? socialAssets.defaultOpenGraph;
+  const openGraphImage = image
+    ? toAbsoluteBlogImageUrl(image, siteUrl)
+    : socialAssets.defaultOpenGraph;
 
   return {
     title,

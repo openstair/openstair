@@ -14,7 +14,7 @@ export const navLinks = [
   },
   { href: "/apps", label: "Applications", match: ["/apps"] },
   { href: "/open-source", label: "Open Source" },
-  { href: "/blog", label: "Blog", match: ["/blog"] },
+  { href: "/blog", label: "Blogs", match: ["/blog"] },
   { href: "/docs", label: "Documentation", match: ["/docs"] },
   { href: "/about", label: "About" },
 ] as const;

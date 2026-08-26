@@ -281,7 +281,6 @@ export default function AppsPage() {
       <Section className="pt-18 pb-12 sm:pt-22 md:pt-28 md:pb-16">
         <div className="grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
           <div className="reveal max-w-3xl">
-            <p className="eyebrow">Applications</p>
             <h1 className="mt-7 text-4xl font-semibold leading-tight text-[var(--color-ink)] sm:text-5xl md:text-6xl">
               Applications We&apos;ve Built
             </h1>

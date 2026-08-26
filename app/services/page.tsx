@@ -93,9 +93,6 @@ export default function ServicesPage() {
       <Section className="pt-18 pb-12 sm:pt-22 md:pt-28 md:pb-16">
         <div className="grid gap-10 lg:grid-cols-[1fr_0.86fr] lg:items-center">
           <div>
-            <p className="reveal inline-flex rounded-full border border-cyan-500/25 bg-cyan-100 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
-              Services
-            </p>
             <h1 className="reveal mt-7 max-w-3xl text-4xl font-semibold leading-tight text-[var(--color-ink)] sm:text-5xl md:text-6xl">
               Software development services for mobile, web, and backend products.
             </h1>

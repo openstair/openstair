@@ -21,7 +21,6 @@ export default function ContactPage() {
       <Section className="pt-18 pb-12 sm:pt-22 md:pt-28 md:pb-16">
         <div className="grid gap-10 lg:grid-cols-[1fr_0.86fr] lg:items-center">
           <div>
-            <p className="eyebrow">Contact</p>
             <h1 className="reveal mt-7 text-4xl font-semibold leading-tight text-[var(--color-ink)] sm:text-5xl md:text-6xl">
               Let&apos;s build your next software product.
             </h1>

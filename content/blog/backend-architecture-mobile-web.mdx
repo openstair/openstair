@@ -10,29 +10,1443 @@ tags:
   - Security
   - APIs
 author: "OpenStair Engineering"
-image: "/branding/illustrations/services/backend.svg"
-imageAlt: "Backend service illustration"
+image: "/branding/illustrations/blog/backend-architecture-mobile-web.png"
+imageAlt: "Illustration of a mobile application connected to backend services and device capabilities"
 internalLinks:
   - href: "/backend-development"
     label: "Backend Development"
   - href: "/services"
     label: "Services"
 ---
+# Backend Architecture for Mobile and Web Applications
 
-## The Backend Carries Product Rules
+A modern product may have a Flutter mobile application, a web application, administrative interfaces, background workers, databases, third-party integrations, and several different clients consuming the same backend.
 
-Mobile and web interfaces should not be forced to reconstruct business logic from scattered endpoints. A dependable backend gives the product a single place for rules, permissions, validation, and long-running workflow decisions.
+At first, this can look like a collection of separate technical problems.
 
-When product rules live in client screens, every new client becomes a new source of truth. A better backend makes clients simpler and keeps sensitive decisions behind trusted boundaries.
+It is actually one system.
 
-## Design Around Boundaries
+The backend sits between users and the resources that make the product work. It validates requests, enforces permissions, stores data, coordinates business rules, communicates with external services, and exposes information to different clients.
 
-Good backend systems separate API contracts, domain behavior, persistence, integrations, and operational concerns. That separation makes change safer when the product adds new clients, user roles, or partner systems.
+That makes backend architecture especially important when one system serves both mobile and web applications.
 
-The exact implementation can be small. A clear module boundary, an explicit service layer, and a tested permission check often matter more than adopting a large framework pattern.
+A good architecture does not attempt to make every client identical.
 
-## Build for Operation
+Instead, it creates stable business and data boundaries while allowing each client to optimize its own experience.
 
-A backend is not finished when endpoints return data. It needs logs, meaningful errors, deployment clarity, migration discipline, and documentation that lets the system be maintained with confidence.
+The central question is:
 
-Operational quality is part of architecture. If a team cannot understand what failed, safely roll forward, or explain a migration, the system is not production-ready yet.
+> How can one backend remain reliable and understandable while serving clients with different capabilities, screen sizes, network conditions, release cycles, and user interactions?
+
+This article explores the practical architectural decisions behind that problem: API boundaries, domain logic, authentication, authorization, data modeling, caching, asynchronous work, compatibility, validation, observability, security, and deployment.
+
+## Start With the System, Not the Framework
+
+Backend architecture discussions often begin with technology choices:
+
+- Which framework?
+- Which database?
+- REST or GraphQL?
+- Which cloud provider?
+- Which message broker?
+
+Those decisions matter, but they should come after understanding the system.
+
+Start with the product's responsibilities.
+
+For example:
+
+```text
+Mobile App ───────┐
+                  │
+Web App ──────────┼──→ Backend
+                  │      ├── Authentication
+Admin Panel ──────┘      ├── Business Rules
+                         ├── Data Access
+                         ├── Background Work
+                         └── External Services
+```
+
+The backend should provide capabilities that multiple clients can rely on without forcing those clients to share the same presentation model.
+
+A mobile screen and a desktop screen may require different data shapes even when they depend on the same underlying business concept.
+
+That distinction is important.
+
+## Separate Business Rules From Presentation
+
+One of the strongest architectural boundaries is separating business logic from client-specific presentation.
+
+Suppose a product has an order.
+
+The business rules might determine:
+
+- whether an order can be cancelled
+- whether a refund is allowed
+- whether the user owns the order
+- whether inventory is available
+- whether payment has completed
+
+Those rules should not exist only inside the Flutter application.
+
+The backend must enforce rules that protect the integrity of the system.
+
+The web application may display the rules differently.
+
+The mobile application may provide a different interaction.
+
+But both should ultimately rely on the same authoritative business rules.
+
+Conceptually:
+
+```text
+Mobile UI ───────┐
+                 ├──→ API ──→ Business Rules ──→ Data
+Web UI ──────────┘
+```
+
+This prevents clients from becoming competing implementations of the same business logic.
+
+## Authentication and Authorization Are Different
+
+Authentication answers:
+
+> Who is the user?
+
+Authorization answers:
+
+> What is the user allowed to do?
+
+The distinction is fundamental.
+
+A backend might authenticate a user successfully and still reject a request because that user does not have permission to access the requested resource.
+
+For example:
+
+```text
+Authenticated user
+        ↓
+Request order 123
+        ↓
+Does user own order 123?
+      /       \
+    yes        no
+     ↓          ↓
+ continue     reject
+```
+
+The backend should enforce authorization for sensitive operations.
+
+A client can hide buttons and screens for convenience, but that is not a security boundary.
+
+A modified client can still attempt the API request directly.
+
+## Design APIs Around Capabilities
+
+An API should expose useful capabilities rather than simply exposing database tables.
+
+A weak design might mirror storage:
+
+```text
+GET /users
+GET /orders
+GET /order_items
+GET /payments
+```
+
+A more useful design considers what clients actually need to accomplish.
+
+For example:
+
+```text
+GET /orders/{id}
+POST /orders/{id}/cancel
+POST /orders/{id}/confirm
+```
+
+The second style communicates operations and business boundaries more clearly.
+
+The correct API structure depends on the product, but the principle is broadly useful:
+
+> Design interfaces around domain capabilities, not accidental database structure.
+
+This makes the backend easier to evolve when storage details change.
+
+## Do Not Make the Mobile Client the Source of Truth
+
+Mobile applications often maintain local state for responsiveness, offline behavior, and reduced network usage.
+
+That does not mean local state should become the authority for server-owned facts.
+
+For example, the client may temporarily display:
+
+```text
+Order status: Pending
+```
+
+while a request is in progress.
+
+But authoritative order state should ultimately come from the system responsible for processing the order.
+
+The client can cache and optimize.
+
+The backend should own the business truth where the business operation requires server authority.
+
+## API Contracts Need Stability
+
+Mobile and web clients do not necessarily upgrade at the same time.
+
+Web applications can often deploy a new frontend and backend together.
+
+Mobile applications are different.
+
+A user may remain on an older version for weeks or months.
+
+Therefore:
+
+```text
+Backend v2
+   ↓
+must potentially support
+   ├── Mobile v1
+   ├── Mobile v2
+   └── Web v2
+```
+
+This makes API compatibility an architectural concern.
+
+When possible, prefer additive changes.
+
+For example, adding:
+
+```json
+{
+  "name": "Asha",
+  "displayName": "Asha Sharma"
+}
+```
+
+is often safer than immediately removing `name`.
+
+The backend can support both during a transition period.
+
+## Avoid Breaking Changes Without a Migration Strategy
+
+Breaking changes are sometimes necessary.
+
+The problem is not breaking change itself.
+
+The problem is breaking clients without a migration path.
+
+A safe migration might look like:
+
+```text
+Introduce new contract
+       ↓
+Deploy backend compatibility
+       ↓
+Release clients
+       ↓
+Monitor adoption
+       ↓
+Deprecate old contract
+       ↓
+Remove old contract
+```
+
+The exact process depends on the system.
+
+The important point is that the backend and clients should not be upgraded as if they were a single binary.
+
+## Versioning Strategy Should Be Intentional
+
+There is no single API versioning strategy that is correct for every product.
+
+Possible approaches include:
+
+- URL versioning
+- header-based versioning
+- content negotiation
+- additive contract evolution
+- explicit capability negotiation
+
+A small product may use a simple compatibility strategy without maintaining multiple major API versions.
+
+A larger public API may require more formal versioning.
+
+What matters is that the team knows:
+
+- how breaking changes are introduced
+- how old clients are supported
+- how deprecated behavior is removed
+- how long compatibility is maintained
+
+Without these rules, API evolution becomes unpredictable.
+
+## Data Modeling Should Follow Domain Requirements
+
+A database schema should support the domain rather than dictate the entire application architecture.
+
+Suppose an order contains multiple products.
+
+A relational model might include:
+
+```text
+orders
+products
+order_items
+payments
+```
+
+The API does not necessarily need to expose those tables directly.
+
+It may return:
+
+```json
+{
+  "id": "order_123",
+  "status": "confirmed",
+  "items": [
+    {
+      "productId": "p1",
+      "name": "Keyboard",
+      "quantity": 1
+    }
+  ]
+}
+```
+
+The database is optimized for persistence and integrity.
+
+The API is optimized for communication.
+
+The UI is optimized for interaction.
+
+Keeping those concerns distinct makes the system easier to change.
+
+## Transactions Protect Invariants
+
+Whenever multiple related changes must succeed together, transactions can protect data integrity.
+
+Imagine an operation that:
+
+1. creates an order
+2. reserves inventory
+3. records a payment state
+
+If one operation succeeds and another fails, the system may enter an invalid state.
+
+A transaction can help when those operations belong to the same atomic consistency boundary.
+
+The exact transaction design depends on the database and domain.
+
+The important question is:
+
+> Which pieces of state must change together to preserve a business invariant?
+
+Not every operation belongs inside one giant transaction.
+
+Large transactions can create contention and reduce scalability.
+
+Use transactions around meaningful consistency boundaries.
+
+## Avoid Unnecessary Database Work
+
+Backend performance is often dominated by data access.
+
+Potential problems include:
+
+- unnecessary queries
+- repeated queries
+- missing indexes
+- retrieving unused columns
+- loading huge collections
+- inefficient joins
+- poorly designed pagination
+
+A query that performs well with 100 records may behave very differently with 10 million.
+
+Database design should therefore consider expected growth.
+
+For important queries, understand:
+
+- filtering conditions
+- sort order
+- indexes
+- cardinality
+- expected result size
+- pagination strategy
+
+Performance should be measured against realistic data volumes rather than development-sized datasets.
+
+## Pagination Is Essential for Large Collections
+
+Returning thousands of records from one API request creates problems for both backend and clients.
+
+The server must:
+
+- query the data
+- serialize it
+- transmit it
+
+The client must:
+
+- receive it
+- parse it
+- store it
+- render or process it
+
+A paginated API keeps the working set manageable.
+
+A simple conceptual flow is:
+
+```text
+Request first page
+      ↓
+Return limited results + continuation information
+      ↓
+Client displays results
+      ↓
+Request next page
+```
+
+For changing datasets, cursor-based pagination can often provide more stable behavior than page-number pagination.
+
+The appropriate strategy depends on the data and access pattern.
+
+## Validate Input at the Backend
+
+Client-side validation improves user experience.
+
+It is not enough for security or data integrity.
+
+The backend should validate requests independently.
+
+For example, a mobile client may send:
+
+```json
+{
+  "quantity": 3
+}
+```
+
+The backend should still determine:
+
+- whether the product exists
+- whether quantity is valid
+- whether the user can purchase it
+- whether inventory is available
+- whether the operation is allowed
+
+The client is an untrusted boundary.
+
+Backend validation is therefore mandatory for operations that affect protected data or business state.
+
+## Make Error Responses Consistent
+
+Clients need predictable errors.
+
+A useful API error response should provide enough structured information for the client to decide what to do without exposing internal implementation details.
+
+Conceptually:
+
+```json
+{
+  "code": "ORDER_NOT_FOUND",
+  "message": "The requested order could not be found."
+}
+```
+
+The exact format depends on the API.
+
+Consistency is more important than any particular field naming.
+
+A client should be able to distinguish between:
+
+```text
+Validation error
+Authentication error
+Authorization error
+Not found
+Conflict
+Rate limit
+Server failure
+```
+
+This allows the UI to provide appropriate behavior.
+
+## Do Not Expose Internal Exceptions
+
+An internal exception might contain:
+
+```text
+database connection details
+stack traces
+table names
+internal identifiers
+service configuration
+```
+
+That information is useful to developers but not necessarily to clients.
+
+The backend should map internal failures into safe external responses while preserving detailed diagnostic information in controlled logs.
+
+Conceptually:
+
+```text
+Internal exception
+      ↓
+Log diagnostic details
+      ↓
+Map to safe API error
+      ↓
+Return response
+```
+
+This provides both security and maintainability.
+
+## Background Work Should Not Block Requests
+
+Some operations do not need to complete before the API response is returned.
+
+Examples include:
+
+- sending email
+- generating reports
+- processing large files
+- updating search indexes
+- sending notifications
+- expensive analytics processing
+
+Instead of:
+
+```text
+Request
+  ↓
+Perform everything
+  ↓
+Response
+```
+
+the system may use:
+
+```text
+Request
+  ↓
+Persist required state
+  ↓
+Queue background work
+  ↓
+Response
+```
+
+A worker can then process the task separately.
+
+This can improve responsiveness and isolate failures.
+
+However, background processing introduces its own requirements:
+
+- retries
+- idempotency
+- failure handling
+- monitoring
+- queue management
+
+It is not a free abstraction.
+
+## Design Background Jobs for Retries
+
+A background worker may fail.
+
+The network may be unavailable.
+
+A third-party service may return an error.
+
+The process may restart.
+
+Therefore, background jobs should be designed with retry behavior in mind.
+
+A useful model is:
+
+```text
+Job created
+   ↓
+Processing
+   ↓
+Success
+```
+
+or:
+
+```text
+Job created
+   ↓
+Processing
+   ↓
+Temporary failure
+   ↓
+Retry
+   ↓
+Success
+```
+
+Eventually:
+
+```text
+Repeated failure
+   ↓
+Dead-letter / manual investigation
+```
+
+The exact mechanism depends on the infrastructure.
+
+The key principle is that failure should be an expected state, not an exceptional surprise.
+
+## Idempotency Matters for Distributed Systems
+
+Suppose a client sends:
+
+```text
+POST /orders
+```
+
+and the server processes the request successfully, but the network connection fails before the client receives the response.
+
+The client may retry.
+
+If the backend blindly creates another order, the user may end up with duplicates.
+
+An idempotency key can allow the backend to recognize that the operation was already processed.
+
+Conceptually:
+
+```text
+Request + idempotency key
+          ↓
+       Server
+          ↓
+Already processed?
+      /        \
+    yes         no
+     ↓           ↓
+Return       Process
+existing     operation
+result
+```
+
+This pattern is valuable for important retryable operations such as:
+
+- payments
+- order creation
+- resource creation
+- uploads
+- external service commands
+
+## Caching Requires a Clear Strategy
+
+Caching can improve performance dramatically.
+
+It can reduce:
+
+- database load
+- API latency
+- repeated network calls
+- expensive computation
+
+But every cache introduces a consistency question:
+
+> How long can this data be stale?
+
+Different data needs different strategies.
+
+For example:
+
+```text
+Static configuration
+→ long cache lifetime
+
+User profile
+→ moderate cache lifetime
+
+Account balance
+→ potentially very short lifetime
+
+Security-sensitive state
+→ authoritative source preferred
+```
+
+There is no universal cache duration.
+
+Caching should therefore be designed according to the meaning of the data.
+
+## Avoid Caching Sensitive Authorization Decisions
+
+Some data should not be trusted simply because it was cached.
+
+For example, caching:
+
+```text
+userCanRefund = true
+```
+
+for an extended period could become dangerous if permissions change.
+
+Authorization decisions for sensitive operations should be validated against an authoritative source appropriate to the security model.
+
+Caches are performance mechanisms.
+
+They should not accidentally become security boundaries.
+
+## Mobile and Web Clients Need Different Data Strategies
+
+The same backend can serve both mobile and web clients without forcing them to consume identical payloads.
+
+A desktop dashboard may need:
+
+```text
+large table
+advanced filtering
+aggregated statistics
+```
+
+while mobile may need:
+
+```text
+summary
+recent records
+small images
+compact metadata
+```
+
+Sending the desktop payload to mobile may waste bandwidth and memory.
+
+Sending a mobile-optimized payload to desktop may require additional requests.
+
+The backend should therefore consider client needs while maintaining domain consistency.
+
+This can be achieved through:
+
+- query parameters
+- resource-specific endpoints
+- response projections
+- dedicated read models
+- backend-for-frontend layers where justified
+
+The appropriate level of specialization depends on system complexity.
+
+## Do Not Create a Backend-for-Frontend by Default
+
+A backend-for-frontend can be useful when mobile and web experiences have substantially different requirements.
+
+For example:
+
+```text
+Mobile BFF ──→ Core services
+Web BFF ─────→ Core services
+```
+
+Each BFF can compose data specifically for its client.
+
+But introducing separate BFF layers also increases:
+
+- deployment complexity
+- maintenance
+- monitoring
+- code duplication
+- operational overhead
+
+A smaller system may not need this architecture.
+
+Start with clear domain APIs and introduce client-specific composition when the actual product requirements justify it.
+
+## Authentication Sessions Need Lifecycle Management
+
+Authentication is not only about login.
+
+A production system needs to consider:
+
+- token expiration
+- refresh
+- logout
+- revoked sessions
+- password changes
+- account deletion
+- multiple devices
+- compromised credentials
+
+A mobile client may remain installed for months.
+
+The backend must therefore handle sessions that outlive individual application launches.
+
+The exact token architecture depends on the authentication system.
+
+The important point is that authentication is a lifecycle rather than a single endpoint.
+
+## Authorization Should Be Enforced at the Resource Boundary
+
+Suppose the API exposes:
+
+```text
+GET /orders/123
+```
+
+Checking that the user is logged in is not sufficient.
+
+The backend must also determine whether that user is allowed to access order `123`.
+
+This is especially important when identifiers are predictable or discoverable.
+
+A secure resource access flow is conceptually:
+
+```text
+Authenticate user
+      ↓
+Identify resource
+      ↓
+Check authorization
+      ↓
+Perform operation
+```
+
+Authorization should be enforced close to the protected operation rather than relying only on UI restrictions.
+
+## Rate Limiting Protects Public APIs
+
+A public API may receive requests from:
+
+- legitimate users
+- automated clients
+- buggy application versions
+- malicious actors
+- unexpectedly popular features
+
+Rate limiting can protect infrastructure from excessive traffic.
+
+Potential strategies include limits by:
+
+- user
+- IP
+- API key
+- endpoint
+- authentication state
+
+The correct limits depend on the operation.
+
+A login endpoint may need stricter protection than a public content endpoint.
+
+Rate limiting should also produce a predictable response so clients can handle temporary rejection appropriately.
+
+## Security Boundaries Should Be Explicit
+
+A useful backend architecture makes trust boundaries visible.
+
+For example:
+
+```text
+Untrusted Client
+       ↓
+Authentication
+       ↓
+Authorization
+       ↓
+Validation
+       ↓
+Business Logic
+       ↓
+Trusted Data Layer
+```
+
+Each layer has a different responsibility.
+
+The client cannot be trusted to enforce business rules.
+
+The API cannot assume input is valid.
+
+The business layer should not depend on presentation details.
+
+The database should not become the place where every business decision is hidden inside queries.
+
+Explicit boundaries make security and maintenance easier.
+
+## Observability Should Cover the Complete Request Path
+
+When a user reports:
+
+> "The application is slow."
+
+the backend team needs to know where the time went.
+
+A request might travel through:
+
+```text
+Mobile
+ ↓
+API Gateway
+ ↓
+Backend
+ ↓
+Database
+ ↓
+External service
+ ↓
+Backend
+ ↓
+Mobile
+```
+
+If only total request time is measured, the team may know that the request is slow but not why.
+
+Useful observability can distinguish:
+
+- API processing time
+- database time
+- external service time
+- queue time
+- serialization time
+
+The exact instrumentation depends on the stack.
+
+The principle is to make important system boundaries observable.
+
+## Correlation IDs Help Debug Distributed Requests
+
+A request may generate several internal operations.
+
+A correlation or request identifier can connect those events.
+
+Conceptually:
+
+```text
+Request ID: abc123
+
+API request
+    ↓
+Database query
+    ↓
+External payment call
+    ↓
+Notification job
+```
+
+When investigating a failure, the identifier allows engineers to follow the request through the system.
+
+This becomes increasingly valuable as the architecture grows.
+
+## Health Checks Are Not Enough
+
+A service can respond:
+
+```text
+HTTP 200 OK
+```
+
+while still being unable to perform important operations.
+
+A useful health strategy may distinguish between:
+
+- process is running
+- dependencies are reachable
+- service is ready to receive traffic
+- critical functionality is operational
+
+The exact implementation depends on deployment infrastructure.
+
+The important point is that "the process is alive" and "the product is healthy" are not necessarily the same thing.
+
+## Deployment Should Be Repeatable
+
+Production deployment should not depend on someone remembering a sequence of manual commands.
+
+A reliable deployment process should make the steps predictable:
+
+```text
+Commit
+ ↓
+Build
+ ↓
+Test
+ ↓
+Package
+ ↓
+Deploy
+ ↓
+Verify
+ ↓
+Monitor
+```
+
+Automation reduces human error.
+
+The exact CI/CD system is less important than reproducibility.
+
+If two engineers perform the same release process manually and get different results, the process is too dependent on hidden knowledge.
+
+## Database Migrations Should Be Deployable Safely
+
+Database migrations deserve special treatment because they can be difficult to reverse.
+
+A migration may:
+
+- add a column
+- create an index
+- modify data
+- rename a field
+- remove old structures
+
+Operations such as destructive schema changes should be planned carefully.
+
+A safer strategy can be:
+
+```text
+Add new structure
+      ↓
+Deploy compatible application
+      ↓
+Migrate data
+      ↓
+Verify usage
+      ↓
+Remove old structure later
+```
+
+This reduces the chance that an old application suddenly encounters a schema it cannot understand.
+
+## Backups Are Part of Architecture
+
+A database is not merely a storage service.
+
+It contains business state that may be impossible to reconstruct.
+
+A production architecture should therefore consider:
+
+- backups
+- backup frequency
+- retention
+- restoration procedures
+- disaster scenarios
+- recovery objectives
+
+A backup that has never been restored is not strong evidence that recovery will work.
+
+Restore testing is therefore an important operational practice.
+
+## Design for Failure of External Services
+
+Modern backends rarely operate alone.
+
+They may depend on:
+
+- payment providers
+- email services
+- object storage
+- notification platforms
+- analytics systems
+- identity providers
+
+External services can become unavailable or slow.
+
+The backend should distinguish between critical and non-critical dependencies.
+
+For example:
+
+```text
+Payment provider unavailable
+        ↓
+Payment cannot complete
+```
+
+is different from:
+
+```text
+Analytics provider unavailable
+        ↓
+Analytics event is dropped or queued
+        ↓
+User operation continues
+```
+
+The system should avoid allowing a non-critical dependency to take down a critical user workflow.
+
+## Asynchronous Integration Can Reduce Coupling
+
+If an external service does not need to respond before the user can continue, asynchronous processing can reduce coupling.
+
+For example:
+
+```text
+Order created
+    ↓
+Persist order
+    ↓
+Queue notification
+    ↓
+Return success
+```
+
+The notification service can process the job independently.
+
+This can improve resilience, but it also means the system must represent the fact that the notification may still be pending.
+
+Distributed systems often require explicit state instead of pretending everything happens instantly.
+
+## Do Not Hide Eventual Consistency
+
+Some operations naturally become eventually consistent.
+
+For example:
+
+```text
+User changes profile
+      ↓
+Primary database updated
+      ↓
+Search index updated later
+```
+
+The search index may briefly contain the old value.
+
+That is acceptable if the product understands and handles the delay.
+
+Problems occur when the architecture accidentally introduces eventual consistency while the UI assumes immediate consistency.
+
+When using asynchronous processing, define:
+
+- which source is authoritative
+- which systems may lag
+- how long lag is acceptable
+- how failures are retried
+- what users should see during the transition
+
+## API Design Should Consider Mobile Networks
+
+Mobile clients operate under less predictable network conditions than servers.
+
+Requests may be:
+
+- delayed
+- interrupted
+- duplicated
+- retried
+- cancelled
+
+API design should therefore avoid assuming that every request completes exactly once.
+
+This makes:
+
+- idempotency
+- timeouts
+- pagination
+- compact payloads
+- retry-safe operations
+
+particularly important.
+
+A mobile client should be able to recover from common network failures without corrupting server state.
+
+## Contract Testing Can Protect Clients
+
+When multiple clients depend on a backend, contract testing can help catch accidental API changes.
+
+The basic idea is:
+
+```text
+Client expectation
+       ↓
+API contract
+       ↓
+Backend implementation
+```
+
+Changes to the backend can then be evaluated against the expectations of supported clients.
+
+This is particularly useful when:
+
+- mobile and web release independently
+- several teams consume the same API
+- the backend changes frequently
+
+The exact tooling is a separate decision.
+
+The architectural principle is to make API compatibility testable rather than relying entirely on manual verification.
+
+## Keep Business Logic Testable
+
+Business rules should be testable without requiring a complete HTTP request and database environment for every case.
+
+For example, an order cancellation rule can be expressed independently:
+
+```text
+Confirmed order
++
+Refund window still open
+=
+Cancellation allowed
+```
+
+That logic can then be tested with focused unit tests.
+
+Higher-level tests can verify that the API correctly connects:
+
+```text
+HTTP request
+   ↓
+Authentication
+   ↓
+Business rule
+   ↓
+Persistence
+```
+
+Separating these levels makes failures easier to diagnose.
+
+## Integration Tests Protect Important Boundaries
+
+Unit tests are useful for isolated rules.
+
+Integration tests are useful for interactions between real components.
+
+Important integration boundaries may include:
+
+- API and database
+- authentication and authorization
+- payment processing
+- message queues
+- storage
+- migrations
+
+Not every possible combination needs an integration test.
+
+Prioritize workflows where a failure would have meaningful production impact.
+
+## Do Not Over-Engineer the First Version
+
+A backend architecture can become unnecessarily complex when teams attempt to solve every future problem immediately.
+
+Examples include:
+
+- microservices for a small product
+- multiple message brokers
+- several caching layers
+- multiple databases without a clear need
+- independent services for every domain concept
+
+Complexity has a cost.
+
+Every additional service introduces:
+
+- deployment
+- monitoring
+- networking
+- authentication
+- failure modes
+- data consistency concerns
+- operational knowledge
+
+A well-structured modular monolith can be an excellent production architecture for many products.
+
+The goal is not to maximize the number of architectural components.
+
+The goal is to create clear boundaries that can evolve.
+
+## Modular Monoliths Can Be a Strong Starting Point
+
+A modular backend can organize code around domains while keeping deployment relatively simple.
+
+For example:
+
+```text
+Backend
+├── Authentication
+├── Users
+├── Orders
+├── Payments
+├── Notifications
+└── Reporting
+```
+
+Each module can have clear:
+
+- business rules
+- services
+- data access
+- APIs
+
+without requiring every module to become a separate deployed service.
+
+If a particular domain later develops independent scaling or operational requirements, it can be extracted.
+
+This approach allows architecture to follow actual system needs rather than speculative future scale.
+
+## When Separate Services Become Useful
+
+Independent services can make sense when a component has genuinely different requirements.
+
+Examples might include:
+
+- high-volume background processing
+- independent scaling needs
+- separate deployment lifecycle
+- strong organizational ownership
+- specialized infrastructure requirements
+
+The decision should be based on measurable constraints.
+
+A service boundary should solve a real problem.
+
+If it only exists because "large systems use microservices," it may create more problems than it solves.
+
+## A Practical Architecture Review
+
+Before finalizing a backend design, walk through a normal user operation.
+
+For example:
+
+```text
+User taps "Place Order"
+        ↓
+Mobile sends request
+        ↓
+Authentication checked
+        ↓
+Authorization checked
+        ↓
+Input validated
+        ↓
+Business rules evaluated
+        ↓
+Database transaction
+        ↓
+Order created
+        ↓
+Background notification queued
+        ↓
+Response returned
+        ↓
+Monitoring records outcome
+```
+
+Then walk through failure cases:
+
+```text
+What if the network fails?
+
+What if the request is retried?
+
+What if the database is unavailable?
+
+What if the payment provider is unavailable?
+
+What if the user sends the request twice?
+
+What if the old mobile version sends an older payload?
+
+What if the notification worker fails?
+
+What if the process crashes after the database transaction but before the response?
+```
+
+These questions reveal architectural weaknesses much earlier than a diagram alone.
+
+## A Production Backend Checklist
+
+### API
+
+- Are endpoints designed around meaningful capabilities?
+- Are request and response contracts predictable?
+- Are errors structured consistently?
+- Are breaking changes managed deliberately?
+
+### Security
+
+- Is authentication separate from authorization?
+- Is authorization enforced server-side?
+- Is input validated independently of the client?
+- Are secrets kept out of client applications?
+- Are sensitive values excluded from logs?
+
+### Data
+
+- Are important invariants protected?
+- Are transactions used where atomicity is required?
+- Are large queries indexed and measured?
+- Are large collections paginated?
+- Are migrations tested against existing data?
+
+### Reliability
+
+- Are retryable operations idempotent?
+- Are background jobs retry-safe?
+- Are external dependencies isolated appropriately?
+- Are failures observable?
+- Are backups and recovery procedures defined?
+
+### Clients
+
+- Can older mobile versions continue working?
+- Are mobile and web payload requirements understood?
+- Are API changes compatible?
+- Are important workflows tested across supported clients?
+
+### Operations
+
+- Is deployment repeatable?
+- Are health and readiness states understood?
+- Are logs and metrics useful?
+- Can incidents be investigated using request context?
+- Can problematic features be disabled where appropriate?
+
+## Conclusion
+
+A backend serving both mobile and web applications has to balance two competing requirements.
+
+It needs stable business and data boundaries so that the system remains consistent.
+
+At the same time, it needs enough flexibility for each client to deliver an appropriate experience.
+
+The strongest architectures achieve this by separating concerns rather than forcing everything into one layer.
+
+The client handles presentation and interaction.
+
+The API provides stable capabilities.
+
+The business layer enforces domain rules.
+
+The database preserves authoritative state.
+
+Background workers handle work that does not need to block the request.
+
+Observability makes the system understandable when something goes wrong.
+
+Security boundaries protect operations regardless of what the client does.
+
+A practical production flow therefore looks like:
+
+```text
+Client
+   ↓
+Stable API contract
+   ↓
+Authentication
+   ↓
+Authorization
+   ↓
+Validation
+   ↓
+Business logic
+   ↓
+Persistence
+   ↓
+Background work where appropriate
+   ↓
+Observability
+```
+
+The architecture does not need to be complicated to be production-grade.
+
+It needs to make responsibilities clear, failures expected, contracts deliberate, and important business rules authoritative.
+
+Start with boundaries that solve today's real problems.
+
+Keep those boundaries clean enough to evolve.
+
+Then let the actual growth and behavior of the product tell you when additional infrastructure or service separation is justified.

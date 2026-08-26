@@ -10,29 +10,1202 @@ tags:
   - Flutter
   - Tools
 author: "OpenStair Engineering"
-image: "/branding/illustrations/documentation/open-source.svg"
-imageAlt: "OpenStair open-source engineering artwork"
+image: "/branding/illustrations/blog/open-source-engineering-principles.png"
+imageAlt: "Illustration of open-source contribution, package, and release workflow"
 internalLinks:
   - href: "/open-source"
     label: "Open Source"
   - href: "https://github.com/openstair"
     label: "GitHub"
 ---
+# Open Source Engineering Principles for Sustainable Software
 
-## Reuse Should Be Earned
+Open source development is often described as a way to make source code available to other people.
 
-Open source work is strongest when it comes from real repeated needs. A package, tool, or reference pattern should clarify a problem instead of adding abstraction for its own sake.
+That description is technically correct, but it misses much of the engineering challenge.
 
-The best reusable work usually starts as ordinary product work. A pattern appears more than once, the team understands its boundaries, and then the public version can be shaped with better names, examples, and constraints.
+A useful open source project has to do more than compile and publish code. People who did not write the software need to be able to understand it, install it, evaluate it, use it, report problems, contribute changes, and determine whether the project is still maintained.
 
-## Good Public Work Raises Internal Quality
+That creates an unusual engineering environment.
 
-Preparing code or documentation for public use forces cleaner naming, sharper boundaries, and better examples. Those habits improve private client work as well.
+In a private application, the original team already possesses much of the context required to operate the system.
 
-Public engineering also creates a useful feedback loop. A small package with clear documentation is easier to test, explain, and maintain than a hidden utility that only one person understands.
+In an open source project, the repository itself becomes part of the communication layer between maintainers and everyone else.
 
-## OpenStair's Commitment
+The code must therefore communicate.
 
-OpenStair contributes Flutter packages, engineering tools, documentation, and libraries back to the community whenever a reusable pattern can help other builders without compromising client trust.
+The documentation must communicate.
 
-Open source is not separate from product discipline. It is one way to turn lessons into durable tools.
+The issue tracker must communicate.
+
+The contribution process must communicate.
+
+Even the release process communicates something about the project's reliability.
+
+The central principle is simple:
+
+> Open source software is easier to adopt when the project makes the path from discovery to successful use predictable.
+
+This article explores the engineering practices that make open source projects easier to understand, contribute to, maintain, and trust.
+
+## The Repository Is a Public Interface
+
+When someone discovers an open source project, they usually cannot ask the original developer for a personal walkthrough.
+
+They inspect the repository.
+
+That means the repository structure becomes part of the project's interface.
+
+A new visitor may immediately look for:
+
+```text
+README
+Source
+Examples
+Tests
+Documentation
+License
+Contribution guide
+Changelog
+```
+
+If these are difficult to find, the project feels harder to understand before the visitor has even evaluated the code.
+
+Repository organization therefore has a user-experience dimension.
+
+It should answer basic questions quickly:
+
+- What does this project do?
+- Who is it for?
+- How do I install it?
+- How do I run it?
+- How do I verify it works?
+- How do I contribute?
+- Where can I find more detailed information?
+
+## The README Is an Entry Point
+
+A README should not attempt to explain the entire project.
+
+Its job is to provide a useful first path.
+
+A strong structure might be:
+
+```text
+Project purpose
+     ↓
+Quick installation
+     ↓
+Small working example
+     ↓
+Main capabilities
+     ↓
+Documentation
+     ↓
+Contribution
+     ↓
+License
+```
+
+The reader should be able to move from:
+
+> "I found this project."
+
+to:
+
+> "I understand what it does."
+
+to:
+
+> "I can try it."
+
+as quickly as practical.
+
+Long background sections can come later.
+
+## Show the Smallest Useful Example
+
+Examples are especially important in open source software because they allow users to evaluate a project without reading its implementation.
+
+For a library, the first example might be:
+
+```dart
+final result = parser.parse(input);
+print(result);
+```
+
+For a command-line tool:
+
+```bash
+tool generate input.json
+```
+
+For a backend service:
+
+```text
+Start service
+   ↓
+Call endpoint
+   ↓
+Receive response
+```
+
+The example should demonstrate the project's core value.
+
+A complicated example can hide that value.
+
+The first example should therefore be small enough to understand quickly but realistic enough to prove that the software works.
+
+## Installation Instructions Should Be Concrete
+
+Avoid instructions such as:
+
+> Install the required dependencies and configure the project.
+
+That assumes the reader already knows what the author knows.
+
+Instead, document the actual sequence.
+
+For example:
+
+```bash
+git clone <repository>
+cd <repository>
+install dependencies
+run setup
+run tests
+start application
+```
+
+The exact commands depend on the technology.
+
+The principle is universal:
+
+> A new contributor should not have to guess what "setup" means.
+
+## Test the README on a Clean Environment
+
+One of the strongest tests of an open source project's documentation is whether someone unfamiliar with the repository can follow it from a clean environment.
+
+The maintainer may have:
+
+- globally installed tools
+- cached dependencies
+- local configuration
+- environment variables
+- undocumented credentials
+- previously generated files
+
+A new contributor has none of those.
+
+A clean setup test exposes hidden assumptions.
+
+This is particularly important for projects that claim to be easy to run locally.
+
+## Examples Are Part of the Public API
+
+When users copy examples, they treat them as authoritative.
+
+That means examples deserve maintenance.
+
+If the API changes from:
+
+```dart
+client.fetchUsers();
+```
+
+to:
+
+```dart
+client.users.list();
+```
+
+the example should change at the same time.
+
+A stale example can create more confusion than a missing example because the reader has a reasonable expectation that it should work.
+
+Examples should therefore be reviewed whenever public behavior changes.
+
+## Explain the Project's Scope
+
+Open source projects often attract users who want to solve slightly different problems.
+
+A README should make the project's intended scope clear.
+
+For example:
+
+```text
+This library handles:
+- parsing
+- validation
+- transformation
+
+It does not handle:
+- persistence
+- authentication
+- network transport
+```
+
+Clear boundaries help users decide whether the project fits their needs.
+
+They also reduce feature requests that are fundamentally outside the project's purpose.
+
+## A Clear Scope Protects Maintainers
+
+Every additional feature creates maintenance cost.
+
+A project that accepts every request can eventually become difficult to understand.
+
+Maintainers should therefore ask:
+
+> Does this capability belong to the project's core purpose?
+
+A feature can be useful and still be inappropriate for the project.
+
+Saying no to unrelated functionality protects:
+
+- architecture
+- documentation
+- testing
+- release complexity
+- maintainer time
+
+Good open source governance includes knowing what not to build.
+
+## Code Should Be Understandable Before It Is Clever
+
+Open source code is read by people with different levels of familiarity.
+
+A clever implementation may be compact but difficult to understand.
+
+A slightly more explicit implementation can be easier to maintain.
+
+For example, code that clearly expresses:
+
+```text
+validate
+transform
+persist
+```
+
+may be preferable to an abstraction that hides all three operations behind a highly generic mechanism.
+
+The best code is not always the shortest.
+
+It is the code whose intent remains understandable to someone who did not write it.
+
+## Public APIs Need Stability
+
+Once people depend on an open source library or tool, its public interfaces become a compatibility commitment.
+
+Changing:
+
+```dart
+client.fetchUsers()
+```
+
+to:
+
+```dart
+client.loadUsers()
+```
+
+may seem trivial to the maintainer.
+
+For users, it can mean:
+
+- compilation failures
+- migration work
+- delayed upgrades
+- broken builds
+
+Public APIs should therefore evolve deliberately.
+
+Possible strategies include:
+
+- additive changes
+- deprecation periods
+- compatibility layers
+- major-version changes for intentional breaking changes
+
+The appropriate strategy depends on the project's release model.
+
+## Deprecation Is a Communication Tool
+
+A deprecation warning is more than a compiler message.
+
+It tells users:
+
+> This interface still works, but you should move to another one.
+
+A useful deprecation path can provide:
+
+```text
+Old API
+   ↓
+Deprecated
+   ↓
+Replacement documented
+   ↓
+Migration period
+   ↓
+Removal in planned breaking release
+```
+
+This gives users time to adapt.
+
+Immediate removal may produce a cleaner codebase for the maintainer but a much more expensive upgrade for users.
+
+## Semantic Versioning Can Set Expectations
+
+Projects that follow semantic versioning commonly communicate compatibility through versions such as:
+
+```text
+1.4.2
+```
+
+where different version components indicate different kinds of changes.
+
+The exact release policy should be documented by the project.
+
+The important principle is that version numbers should communicate something meaningful.
+
+If every release can unexpectedly break consumers, users cannot confidently automate upgrades.
+
+If breaking changes are hidden inside minor updates, trust in the versioning system decreases.
+
+## Changelogs Preserve Release Context
+
+A changelog should answer:
+
+> What changed between versions?
+
+Useful entries can include:
+
+- new features
+- bug fixes
+- breaking changes
+- deprecations
+- security fixes
+- migration notes
+
+For example:
+
+```text
+## 2.0.0
+
+Breaking:
+- Renamed authentication configuration.
+
+Added:
+- Token refresh support.
+
+Migration:
+- Replace old configuration field with `refreshToken`.
+```
+
+The important information is not merely that something changed.
+
+It is how users should respond.
+
+## Breaking Changes Need Migration Guidance
+
+A release note saying:
+
+> "Updated authentication API."
+
+is not enough when the old API no longer works.
+
+A useful migration note explains:
+
+```text
+Before
+→ old usage
+
+After
+→ new usage
+
+Why
+→ reason for change
+
+Action
+→ what users need to update
+```
+
+This can significantly reduce upgrade friction.
+
+## Tests Are Part of the Project's Trust Model
+
+Open source users cannot assume that every change has been tested.
+
+The project has to demonstrate that itself.
+
+Tests provide evidence that important behavior is expected and protected.
+
+A healthy project may contain:
+
+- unit tests
+- integration tests
+- API tests
+- example validation
+- regression tests
+
+The exact balance depends on the software.
+
+The important principle is that tests should protect meaningful behavior rather than merely maximize a coverage percentage.
+
+## Test Behavior, Not Implementation Details
+
+Tests become brittle when they verify internal structure instead of observable behavior.
+
+Suppose a parser is refactored internally.
+
+A strong test should continue passing if the external behavior remains correct.
+
+This allows maintainers to improve implementation without rewriting the test suite unnecessarily.
+
+Tests should therefore focus on contracts such as:
+
+```text
+Input
+   ↓
+Expected behavior
+   ↓
+Expected result
+```
+
+rather than private implementation details wherever possible.
+
+## Regression Tests Preserve Lessons
+
+When a real bug is discovered, a regression test can preserve the lesson.
+
+The process is:
+
+```text
+Bug discovered
+    ↓
+Understand cause
+    ↓
+Fix behavior
+    ↓
+Add regression test
+    ↓
+Future changes run against the test
+```
+
+This is particularly valuable in open source projects because a future contributor may not know the history behind the bug.
+
+The test becomes executable institutional memory.
+
+## Continuous Integration Protects Contributors
+
+A contribution should ideally be evaluated automatically.
+
+A typical CI pipeline may run:
+
+```text
+Formatting
+   ↓
+Static analysis
+   ↓
+Unit tests
+   ↓
+Integration tests
+   ↓
+Build
+```
+
+The exact pipeline depends on the project.
+
+Automation provides a shared baseline.
+
+A contributor does not need to rely on a maintainer remembering every validation step.
+
+## CI Should Be Reproducible
+
+If a project says:
+
+> Run these commands locally.
+
+the CI environment should ideally perform substantially the same checks.
+
+Otherwise, contributors can experience:
+
+```text
+Local tests pass
+      ↓
+Pull request fails
+      ↓
+Unknown CI-specific problem
+```
+
+Differences may sometimes be necessary, but they should be understood.
+
+Reproducible validation makes contribution less frustrating.
+
+## Contribution Guidelines Should Answer Practical Questions
+
+A contribution guide should explain:
+
+- how to set up the project
+- how to run tests
+- formatting expectations
+- branch or pull request expectations
+- commit conventions where relevant
+- what maintainers expect from a change
+- how to report bugs
+- how to propose features
+
+The goal is to remove uncertainty before a contributor starts work.
+
+## Make Small Contributions Easy
+
+A first contribution should not require understanding the entire architecture.
+
+Good projects provide opportunities such as:
+
+- documentation fixes
+- small bug fixes
+- tests
+- examples
+- simple improvements
+
+Issue labels such as:
+
+```text
+good first issue
+help wanted
+documentation
+```
+
+can help newcomers find appropriate tasks.
+
+But labels alone are not enough.
+
+The issue should contain enough context for someone unfamiliar with the project to understand what is expected.
+
+## Issues Should Capture Problems Clearly
+
+A useful bug report usually includes:
+
+```text
+What happened?
+What was expected?
+How can it be reproduced?
+Environment
+Version
+Relevant logs
+```
+
+A template can guide users toward providing this information.
+
+Good issue templates reduce back-and-forth and help maintainers reproduce problems faster.
+
+## Feature Requests Need Context
+
+A feature request should explain more than:
+
+> "Please add X."
+
+Useful information includes:
+
+- what problem the feature solves
+- who needs it
+- how the feature would be used
+- whether an existing workaround exists
+- whether it changes public APIs
+
+This gives maintainers enough context to evaluate the underlying problem rather than reacting only to the proposed implementation.
+
+## Maintainers Should Separate Ideas From Commitments
+
+An issue tracker can contain many possible ideas.
+
+Not every idea should become a commitment.
+
+A healthy project distinguishes between:
+
+```text
+Idea
+↓
+Discussion
+↓
+Accepted
+↓
+Planned
+↓
+Implemented
+```
+
+This prevents the issue tracker from becoming a promise that every requested feature will eventually ship.
+
+Clear status also helps contributors understand where their effort is most useful.
+
+## Code Review Is Part of Project Design
+
+Pull request review should not focus only on syntax.
+
+Reviewers should consider:
+
+- API impact
+- architecture
+- tests
+- documentation
+- backwards compatibility
+- security
+- performance
+- maintenance cost
+
+A small change can still have a large public impact.
+
+For example, changing a default value can affect thousands of users without changing much source code.
+
+Review should therefore consider behavior, not just diff size.
+
+## Avoid Excessive Review Friction
+
+Quality does not require every contribution to go through a complicated process.
+
+A project can have clear expectations without making simple documentation changes require the same process as a major architectural change.
+
+Different changes may need different levels of review.
+
+For example:
+
+```text
+Documentation typo
+→ lightweight review
+
+Bug fix
+→ normal review + tests
+
+Public API change
+→ deeper review + migration discussion
+```
+
+The process should match the risk.
+
+## Security Reporting Needs a Private Path
+
+Security vulnerabilities should not always be reported publicly.
+
+Publishing exploit details in a public issue before a fix exists can put users at risk.
+
+Projects should therefore provide an appropriate private reporting mechanism and document how security issues should be reported.
+
+A security policy can explain:
+
+- how to report
+- what information to include
+- expected response process
+- supported versions
+- disclosure approach
+
+The exact process depends on the project.
+
+The important point is to separate security reporting from ordinary bug reporting.
+
+## Dependencies Are Part of Your Attack Surface
+
+Open source projects often depend on other packages.
+
+Those dependencies can introduce:
+
+- vulnerabilities
+- compatibility problems
+- licensing considerations
+- abandoned components
+
+Dependency management should therefore be treated as ongoing maintenance.
+
+Useful practices include:
+
+- reviewing dependency updates
+- removing unnecessary dependencies
+- monitoring known vulnerabilities
+- understanding licenses
+- testing updates before release
+
+Adding a dependency is not free.
+
+It adds code, behavior, and future maintenance responsibility.
+
+## Licenses Define How Others Can Use the Project
+
+An open source repository should clearly state its license.
+
+The license determines what others can generally do with the software, subject to its specific terms.
+
+Users should not have to infer licensing permissions from repository conventions.
+
+The project should include an appropriate license file and explain any additional licensing considerations when relevant.
+
+Legal requirements can vary, so licensing decisions should be made carefully.
+
+## Community Standards Shape the Project
+
+A codebase is not the only thing contributors interact with.
+
+They also interact with:
+
+- maintainers
+- reviewers
+- issue discussions
+- pull requests
+- documentation
+
+A project should establish basic expectations for respectful and constructive collaboration.
+
+A code of conduct can help define those expectations.
+
+The purpose is not bureaucracy.
+
+It is to create a predictable environment in which people can contribute.
+
+## Communication Is an Engineering Skill
+
+Maintainers frequently have to explain:
+
+- why a proposal is rejected
+- why an API cannot be changed immediately
+- why a workaround is preferred
+- why a contribution needs revision
+
+Clear communication matters.
+
+For example, instead of:
+
+> "We don't want this."
+
+a maintainer can explain:
+
+> "This would introduce a second configuration model that overlaps with the existing API. We would prefer to solve the underlying use case without adding another public abstraction."
+
+The second response preserves the technical reasoning.
+
+That makes future discussion more productive.
+
+## Documentation and Code Should Evolve Together
+
+A public behavior change should usually trigger a documentation review.
+
+For example:
+
+```text
+API changed
+   ↓
+Reference updated
+
+CLI command changed
+   ↓
+Usage guide updated
+
+Configuration changed
+   ↓
+Setup documentation updated
+
+Architecture changed
+   ↓
+Architecture explanation updated
+```
+
+Documentation should not become a separate backlog that is always postponed.
+
+If users cannot understand the current behavior, the project is effectively shipping an incomplete interface.
+
+## Examples Should Be Tested Where Possible
+
+A project can have a beautiful README example that does not compile.
+
+This is particularly damaging because new users often begin with that example.
+
+Where practical, examples can be:
+
+- compiled
+- executed in CI
+- tested as part of integration tests
+- generated from real API definitions
+
+Automation is not always necessary.
+
+But important examples should have some mechanism that reduces the chance of silent breakage.
+
+## Release Automation Reduces Human Error
+
+A release can involve:
+
+```text
+Version update
+ ↓
+Changelog
+ ↓
+Build
+ ↓
+Tests
+ ↓
+Package
+ ↓
+Publish
+ ↓
+Tag
+```
+
+Manual repetition increases the chance of mistakes.
+
+Automating deterministic steps can make releases more reliable.
+
+The exact level of automation should match the project.
+
+A small library may need only a simple CI release workflow.
+
+A complex ecosystem may require more controlled release orchestration.
+
+## Releases Should Be Reproducible
+
+A release should ideally be traceable to:
+
+- a specific source revision
+- a specific version
+- known build steps
+- known dependencies
+- generated artifacts
+
+This makes it easier to answer:
+
+> Exactly what code produced this release?
+
+Reproducibility becomes especially valuable when a release introduces a serious regression.
+
+The team can identify the source change and compare it with previous releases.
+
+## Keep a Clear Changelog
+
+A changelog should not be a dump of commit messages.
+
+Users care about changes in behavior.
+
+Instead of:
+
+```text
+fix: update service
+refactor: rename helper
+chore: dependency update
+```
+
+a user-facing changelog might say:
+
+```text
+Fixed an issue where requests could fail after token refresh.
+
+Updated the authentication API to support automatic token renewal.
+
+Deprecated the old manual refresh method.
+```
+
+The changelog should translate implementation changes into user impact.
+
+## Do Not Hide Breaking Changes
+
+Breaking changes should be obvious.
+
+A user should not discover after upgrading that:
+
+```text
+Old API no longer compiles.
+```
+
+without warning.
+
+Highlight:
+
+- removed APIs
+- changed defaults
+- changed configuration
+- migration steps
+- supported versions
+
+Trust is easier to maintain when projects communicate inconvenient changes clearly.
+
+## Open Source Maintenance Is Long-Term Work
+
+Publishing a repository is easy.
+
+Maintaining one is not.
+
+Over time, maintainers have to handle:
+
+- bug reports
+- dependency updates
+- security issues
+- compatibility
+- documentation
+- feature requests
+- releases
+- contributor questions
+
+The project should therefore be designed for sustainable maintenance.
+
+This includes keeping the codebase understandable and avoiding unnecessary complexity.
+
+## Avoid Building Maintainer Traps
+
+A maintainer trap is a design decision that makes future maintenance disproportionately difficult.
+
+Examples include:
+
+- undocumented build processes
+- tightly coupled modules
+- unclear ownership
+- too many configuration options
+- public APIs that cannot evolve
+- dependencies that only one person understands
+- tests that depend heavily on implementation details
+
+The project may work today.
+
+The problem appears when someone has to change it later.
+
+Maintainability is therefore part of project quality.
+
+## Prefer Boring Infrastructure When It Works
+
+Open source projects often benefit from predictable infrastructure.
+
+A simple:
+
+```text
+Repository
+   ↓
+CI
+   ↓
+Tests
+   ↓
+Package release
+```
+
+can be easier to maintain than a complicated pipeline involving many custom services.
+
+The best infrastructure is usually the smallest system that reliably supports the project's needs.
+
+Complexity should solve a real problem.
+
+## Measure the Health of the Project
+
+Technical metrics can provide useful signals.
+
+Possible indicators include:
+
+- issue response time
+- release frequency
+- build success rate
+- unresolved security issues
+- dependency age
+- contributor activity
+- documentation freshness
+
+These metrics should be interpreted carefully.
+
+For example, a project with few issues may simply have few users.
+
+The goal is not to optimize a dashboard.
+
+It is to identify problems that affect the project's sustainability.
+
+## Community Growth Should Not Outrun Maintainer Capacity
+
+A successful project can receive more contributions than maintainers can review.
+
+That can create a backlog.
+
+The answer is not necessarily to accept every contribution.
+
+Maintainers may need:
+
+- clearer contribution guidelines
+- better issue templates
+- stronger automated checks
+- additional reviewers
+- smaller contribution scopes
+- explicit project priorities
+
+The project should grow at a pace that can be supported.
+
+## Build a Clear Contribution Path
+
+A contributor should be able to understand:
+
+```text
+Discover project
+      ↓
+Read README
+      ↓
+Run locally
+      ↓
+Find issue
+      ↓
+Make change
+      ↓
+Run checks
+      ↓
+Open pull request
+      ↓
+Review
+      ↓
+Merge
+```
+
+If any step requires hidden knowledge, contributors may stop before completing the process.
+
+A good contribution path is one of the strongest ways to turn interested users into contributors.
+
+## Open Source Projects Need Boundaries
+
+Being open source does not mean accepting every request.
+
+Maintainers need to define:
+
+- supported platforms
+- supported versions
+- project scope
+- contribution expectations
+- compatibility policy
+- support policy
+
+Clear boundaries reduce ambiguity.
+
+They also make it easier to explain why certain requests are outside the project's goals.
+
+## A Practical Open Source Checklist
+
+### Repository
+
+- Is the purpose clear?
+- Is the project easy to install?
+- Is the structure understandable?
+- Is the license present?
+
+### Documentation
+
+- Is there a useful README?
+- Is there a working quick start?
+- Are important APIs documented?
+- Are examples current?
+- Are migration notes available?
+
+### Quality
+
+- Are important behaviors tested?
+- Is CI automated?
+- Are regressions protected?
+- Are examples validated where practical?
+
+### Contribution
+
+- Is local setup documented?
+- Are contribution guidelines clear?
+- Are issue templates useful?
+- Is the review process understandable?
+
+### Security
+
+- Is there a private security reporting path?
+- Are dependencies maintained?
+- Are secrets excluded?
+- Are supported versions clear?
+
+### Releases
+
+- Are versions meaningful?
+- Are breaking changes communicated?
+- Is there a changelog?
+- Are releases reproducible?
+
+### Maintenance
+
+- Is ownership clear?
+- Is the project scope defined?
+- Are deprecated APIs managed?
+- Can new maintainers understand the system?
+
+## The Goal Is Trust
+
+The strongest open source projects create confidence before a user ever depends on them.
+
+A developer should be able to look at a project and reasonably answer:
+
+```text
+I understand what it does.
+        ↓
+I can install it.
+        ↓
+I can try it.
+        ↓
+I can read how it works.
+        ↓
+I can see how it is tested.
+        ↓
+I understand how releases work.
+        ↓
+I know how to report problems.
+        ↓
+I can see whether it is maintained.
+```
+
+None of these guarantees that the software is perfect.
+
+They demonstrate that the project takes responsibility for being used by others.
+
+That is a major part of open source engineering quality.
+
+## Conclusion
+
+Open source engineering is not simply private software with a public repository.
+
+The repository becomes a communication surface.
+
+The documentation becomes part of the product.
+
+The public API becomes a compatibility commitment.
+
+The tests become evidence of expected behavior.
+
+The contribution guide becomes an onboarding path.
+
+The release process becomes a signal of project discipline.
+
+The issue tracker becomes part of the community's communication system.
+
+Sustainable open source projects therefore optimize for more than code execution.
+
+They optimize for understanding.
+
+A practical lifecycle looks like:
+
+```text
+Design
+   ↓
+Implement
+   ↓
+Document
+   ↓
+Test
+   ↓
+Review
+   ↓
+Release
+   ↓
+Support
+   ↓
+Learn
+   ↓
+Improve
+```
+
+The goal is not to create a perfect project that never needs maintenance.
+
+The goal is to create a project that other people can understand, use, improve, and trust without requiring constant private guidance from its original authors.
+
+When the code, documentation, contribution process, release strategy, and community expectations all reinforce that goal, open source becomes more than source-code distribution.
+
+It becomes a sustainable engineering practice.

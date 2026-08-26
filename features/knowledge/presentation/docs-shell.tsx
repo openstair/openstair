@@ -20,7 +20,6 @@ export function DocsShell({
       <section className="py-12 md:py-16">
         <div className="mb-8 grid gap-8 border-b border-slate-200 pb-8 lg:grid-cols-[1fr_0.6fr] lg:items-center">
           <div>
-            <p className="eyebrow">Company Knowledge</p>
             <h1 className="mt-4 text-3xl font-semibold leading-tight text-[var(--color-ink)] md:text-5xl">
               Documentation
             </h1>

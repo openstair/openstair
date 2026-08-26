@@ -1,10 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useId, useState } from "react";
 import { Container } from "@/components/layout/container";
-import { BrandLogo } from "@/components/ui/brand-logo";
 import { navLinks } from "@/lib/site-content";
 
 function isActiveRoute(
@@ -32,7 +32,15 @@ function BrandMark() {
       aria-label="OpenStair Technologies home"
     >
       <span className="relative inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-500/20 bg-white shadow-[0_14px_34px_rgba(8,145,178,0.12)] transition duration-300 group-hover:border-cyan-500/40">
-        <BrandLogo markOnly className="h-8 w-8" priority />
+        <Image
+          src="/icon1.png"
+          alt=""
+          width={60}
+          height={60}
+          priority
+          aria-hidden="true"
+          className="h-[30px] w-[30px] rounded-xl object-contain"
+        />
       </span>
       <span className="min-w-0">
         <span className="block text-base font-semibold leading-tight text-[var(--color-ink)] sm:text-lg">

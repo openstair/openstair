@@ -220,9 +220,6 @@ function ArticlePage({ slug }: { slug: string }) {
           </nav>
           <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_0.74fr] lg:items-center">
             <div>
-              <p className="reveal inline-flex rounded-full border border-cyan-500/25 bg-cyan-100 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-700">
-                {post.category.name}
-              </p>
               <h1 className="reveal mt-6 max-w-4xl text-4xl font-semibold leading-tight text-[var(--color-ink)] sm:text-5xl md:text-6xl">
                 {post.title}
               </h1>

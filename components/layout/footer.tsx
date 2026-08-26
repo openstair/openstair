@@ -149,6 +149,7 @@ const legalLinks = [
 const footerSocialLinks = platformLinks.filter((link) =>
   ["GitHub", "LinkedIn", "Instagram", "Facebook", "YouTube"].includes(link.label),
 );
+const footerEmail = "hello@openstair.in";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -180,15 +181,20 @@ export function Footer() {
             <p className="mt-5 text-sm leading-7 text-slate-300">
               OpenStair Technologies builds dependable mobile, web, and backend software with clear architecture, practical documentation, and long-term delivery ownership.
             </p>
-            <address className="mt-5 not-italic text-sm leading-7 text-slate-400">
-              <span className="block text-slate-300">Address</span>
-              Kirtinagar
-              <br />
-              Tehri Garhwal
-              <br />
-              Uttarakhand – 249161
-              <br />
-              India
+            <address className="mt-4 space-y-1 not-italic text-xs leading-6 text-slate-500">
+              <p>
+                <span className="font-semibold text-slate-400">Address:</span>{" "}
+                Kirtinagar, Tehri Garhwal, Uttarakhand - 249161, India
+              </p>
+              <p>
+                <span className="font-semibold text-slate-400">Email:</span>{" "}
+                <Link
+                  href={`mailto:${footerEmail}`}
+                  className="inline-flex text-slate-400 transition duration-300 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-200"
+                >
+                  {footerEmail}
+                </Link>
+              </p>
             </address>
           </section>
 
