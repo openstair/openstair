@@ -1,6 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Container } from "@/components/layout/container";
-import { BrandLogo } from "@/components/ui/brand-logo";
 import { platformLinks, siteName } from "@/lib/site-content";
 
 function PlatformIcon({ icon }: { icon: (typeof platformLinks)[number]["icon"] }) {
@@ -142,14 +142,16 @@ const companyLinks = [
 ] as const;
 
 const legalLinks = [
-  { href: "/docs/legal/privacy-policy-overview", label: "Privacy" },
-  { href: "/docs/legal/terms-overview", label: "Terms" },
+  { href: "/privacy", label: "Privacy Policy" },
+  { href: "/terms", label: "Terms of Service" },
 ] as const;
 
 const footerSocialLinks = platformLinks.filter((link) =>
   ["GitHub", "LinkedIn", "Instagram", "Facebook", "YouTube"].includes(link.label),
 );
 const footerEmail = "hello@openstair.in";
+const footerMobile = "+91 78188 99109";
+const footerMobileN = "+917818899109";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -166,8 +168,16 @@ export function Footer() {
               className="inline-flex items-center gap-3 rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-200"
               aria-label="OpenStair Technologies home"
             >
-              <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-300/25 bg-white shadow-[0_0_34px_rgba(103,232,249,0.18)]">
-                <BrandLogo markOnly className="h-7 w-7" />
+              <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-cyan-300/25 bg-white shadow-[0_0_34px_rgba(103,232,249,0.18)]">                
+              <Image
+                  src="/icon1.png"
+                  alt=""
+                  width={60}
+                  height={60}
+                  priority
+                  aria-hidden="true"
+                  className="h-[30px] w-[30px] rounded-xl object-contain"
+                />
               </span>
               <span>
                 <span className="block text-lg font-semibold leading-tight text-white">
@@ -193,6 +203,14 @@ export function Footer() {
                   className="inline-flex text-slate-400 transition duration-300 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-200"
                 >
                   {footerEmail}
+                </Link>
+                <br />
+                <span className="font-semibold text-slate-400">Phone number:</span>{" "}
+                <Link
+                  href={`tel:${footerMobileN}`}
+                  className="inline-flex text-slate-400 transition duration-300 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-200"
+                >
+                  {footerMobile}
                 </Link>
               </p>
             </address>

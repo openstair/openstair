@@ -74,7 +74,6 @@ export default function HomePage() {
       <Section className="relative overflow-hidden pt-16 pb-14 sm:pt-20 md:pt-24 md:pb-20">
         <div className="relative grid gap-10 lg:grid-cols-[0.86fr_1.14fr] lg:items-center">
           <div className="reveal max-w-3xl">
-            <p className="eyebrow">Software Engineering Company</p>
             <h1 className="mt-7 text-4xl font-semibold leading-[1.02] text-[var(--color-ink)] sm:text-5xl md:text-6xl">
               Premium software engineering for products that need to feel reliable from day one.
             </h1>
