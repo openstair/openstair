@@ -1,5 +1,4 @@
 ---
-
 title: "Flutter Clean Architecture for Maintainable Mobile Apps"
 description: "How feature boundaries, domain rules, and disciplined state management keep Flutter apps ready for real product growth."
 slug: "flutter-clean-architecture"
@@ -18,1494 +17,784 @@ internalLinks:
     label: "Flutter Development"
   - href: "/docs/company/engineering-philosophy"
     label: "Engineering Philosophy"
-
 ---
 
 # Flutter Clean Architecture for Maintainable Mobile Apps
 
-A Flutter application can start small and still become difficult to maintain surprisingly quickly.
+A Flutter application often begins with deceptive simplicity. With a handful of widgets, a state notifier, and direct HTTP calls via `http` or `dio`, a team can assemble a functional prototype in days. However, as the application expands into a production mobile product, this informal structure rapidly deteriorates under real-world requirements.
 
-A few screens may initially need only widgets, a state-management solution, and a couple of API calls. As the product grows, those same features often accumulate validation rules, authentication requirements, caching, local persistence, analytics, background operations, error handling, and multiple UI states.
+Features accumulate authentication tokens, multi-step validation rules, local caching, offline synchronization queues, analytics events, transient network failures, and intricate UI states. When these responsibilities share the same classes:
+- widgets begin issuing direct network requests and decoding raw JSON payloads;
+- state controllers manipulate database cursors and execute business calculations;
+- backend schema changes force breaking refactors across dozens of UI layout files;
+- writing unit tests requires mocking the entire Flutter widget tree, HTTP clients, and database engines simultaneously.
 
-The problem is rarely that Flutter cannot handle this complexity. The problem is that the responsibilities inside the application gradually become mixed together.
+Clean Architecture addresses this coupling. It is not an exercise in creating nested folder hierarchies or manufacturing boilerplate interfaces for every single class. Instead, it is an architectural discipline designed to enforce the **Dependency Inversion Principle**: keeping core business policies completely independent of UI frameworks, database engines, network clients, and third-party software development kits (SDKs).
 
-A widget starts making network requests. A state controller begins performing business calculations. API response models spread throughout the presentation layer. Database details leak into application logic. Tests become difficult because testing one business rule requires constructing a large part of the application.
+This guide provides a comprehensive, production-tested implementation of Clean Architecture in Flutter using modern Dart 3 idioms. We will examine the core dependency rules, establish strict boundaries between Domain Entities and Data Transfer Objects (DTOs), implement functional error handling with sealed class hierarchies, build a complete end-to-end vertical slice, and analyze critical architectural anti-patterns.
 
-Clean Architecture is one way to prevent that gradual coupling.
+---
 
-The goal is not to create the largest possible folder hierarchy or put every class behind an interface. The goal is to create boundaries that make the important parts of an application easier to understand, test, and change.
+## 1. The Core Dependency Rule and Layer Boundaries
 
-This article explains how to apply those principles to Flutter applications in a practical way, including project organization, domain and data boundaries, repositories, use cases, state management, dependency injection, testing, error handling, offline data, common mistakes, and situations where a simpler architecture is actually better.
+Clean Architecture—derived from Uncle Bob's original formulation and adapted for modern reactive client frameworks—organizes an application into concentric layers. The governing constraint is **The Dependency Rule**:
 
-## What Clean Architecture Is Really Trying to Solve
+> **Source code dependencies must point strictly inward toward higher-level policies.** Inner layers must have zero knowledge of outer layers, their classes, their functions, or their data structures.
 
-Clean Architecture is fundamentally about controlling dependencies.
+In a Flutter application, this architecture organizes into three distinct layers:
 
-A production mobile application usually contains several different types of responsibility:
+```text
+┌─────────────────────────────────────────────────────────────┐
+│                    PRESENTATION LAYER                       │
+│   Widgets • State Notifiers • ViewModels • UI State Machines │
+└──────────────────────────────┬──────────────────────────────┘
+                               │ (depends on)
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│                       DOMAIN LAYER                          │
+│   Entities • Value Objects • Use Cases • Repository Ports   │
+│                 (Pure Dart — Zero Flutter)                  │
+└──────────────────────────────▲──────────────────────────────┘
+                               │ (implements contracts)
+┌──────────────────────────────┴──────────────────────────────┐
+│                        DATA LAYER                           │
+│  Repository Implementations • Remote/Local DataSources • DTOs│
+└─────────────────────────────────────────────────────────────┘
+```
 
-* user interface
-* presentation state
-* application workflows
-* business rules
-* network communication
-* local persistence
-* serialization
-* platform integrations
-* third-party services
+Notice the dependency inversion occurring at the Data layer boundary. The Domain layer defines the abstract contract (a repository port), while the Data layer implements that contract (an adapter). High-level business logic never depends on concrete database drivers or network libraries; instead, both the Presentation and Data layers converge upon the stable abstractions defined within the Domain.
 
-These responsibilities have different rates of change.
+### Clean Architecture Layer Matrix
 
-A UI design can change without changing a business rule.
+| Layer | Primary Responsibilities | Permitted Dependencies | Prohibited Dependencies | Core Artifacts |
+| :--- | :--- | :--- | :--- | :--- |
+| **Domain** | Expresses enterprise and application business logic, models core entities, defines repository contracts. | Pure Dart standard library (`dart:core`, `dart:async`, `dart:math`). | `package:flutter/*`, `dart:io`, `dart:ui`, external HTTP or database packages. | Entities, Value Objects, Use Cases (Interactors), Repository Interfaces. |
+| **Data** | Fetches, persists, serializes, and deserializes raw payloads; implements repository contracts; translates exceptions into domain failures. | Domain layer, I/O libraries (`dart:io`), serialization packages, database engines (`sqflite`, `hive`), HTTP clients. | Presentation layer (`package:flutter/widgets.dart`), UI controllers. | Data Transfer Objects (DTOs), Remote Data Sources, Local Data Sources, Repository Implementations. |
+| **Presentation** | Renders UI widgets, captures user gestures, binds to state notifiers, manages visual layout and animations. | Domain layer, Flutter framework (`package:flutter/*`), state management tooling (Riverpod, Bloc, Provider). | Concrete Data layer classes (e.g., `UserRepositoryImpl`, `ApiClient`), raw SQL/JSON payloads. | Pages, Screen Widgets, Presentation Controllers, ViewModels, Sealed UI States. |
 
-An API response can change without changing how a business decision is made.
+### Why the Domain Layer Must Remain Pure Dart
 
-A local cache can be introduced without changing how a user qualifies for a particular operation.
+The Domain layer is the conceptual core of your business. If your team decides to migrate from Flutter to another Dart client environment (such as server-side Dart, Dart CLI tools, or web-based background workers), the Domain layer should compile and execute without modifying a single line of code.
 
-A good architecture makes those differences explicit.
+More importantly, keeping the Domain layer free of `package:flutter/*` dependencies yields three immediate engineering advantages:
+1. **Lightning-Fast Unit Tests**: Domain unit tests run directly on the standard Dart Virtual Machine without initializing Flutter test bindings, layout engines, or asset bundles. Hundreds of domain logic tests can execute in milliseconds.
+2. **Zero Framework Churn**: Changes to Flutter's rendering APIs, widget life-cycles, or third-party state packages cannot cascade into your business logic.
+3. **Purity of Thought**: Engineers working on business workflows are constrained from taking shortcuts, such as accessing `BuildContext` or dispatching navigation events directly from business rules.
 
-Consider a simple login implementation:
+---
+
+## 2. Entities vs. Data Transfer Objects (DTOs)
+
+One of the most widespread structural flaws in Flutter codebases is passing API response models directly into presentation widgets:
+
+```text
+❌ ANTI-PATTERN: Leaking API Schemas into the UI Tree
+[ Backend JSON ] ──> [ UserDto ] ──> [ ProfileScreen Widget ]
+```
+
+When a backend service updates a key (for example, renaming `user_name` to `display_name` or restructuring a nested user profile payload), every widget displaying that user field breaks. Furthermore, API schemas often include serialization metadata, wire-format quirks (e.g., string representations of integers, Unix timestamps in milliseconds, or nullability indicators), and transport-specific flags that have no relevance to application business logic.
+
+Clean Architecture solves this by strictly separating **Domain Entities** from **Data Transfer Objects (DTOs)**.
+
+```text
+✅ CLEAN ARCHITECTURE BOUNDARY: Explicit Mapping Isolation
+[ Backend JSON ] ──> [ UserDto ] ──( .toDomain() )──> [ User Entity ] ──> [ Presentation Widget ]
+                                  ▲
+                         Data Layer Boundary
+```
+
+### The Roles Defined
+
+- **Domain Entity**: A business model defined purely by its domain identity and invariants. It uses rich Dart types (such as `DateTime`, enums, records, or custom Value Objects) and encapsulates business behavior. It contains zero knowledge of JSON keys, database column names, or network protocols.
+- **Data Transfer Object (DTO)**: An infrastructure model whose sole purpose is mirroring the wire format of an external service or database table. It handles serialization (`fromJson`, `toJson`), field nullability fallback, and format validation. It provides an explicit mapper method (e.g., `.toDomain()`) to translate external payloads into domain entities.
+
+### Isolating External Schema Volatility
+
+Consider an API endpoint returning user profile data. The wire format contains snake_case keys, a Unix timestamp, and a verification date string:
 
 ```dart
-onPressed: () async {
-  final response = await http.post(
-    Uri.parse('https://example.com/login'),
-    body: {
-      'email': emailController.text,
-      'password': passwordController.text,
-    },
-  );
-
-  if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-
-    // Save token.
-    // Update state.
-    // Navigate.
-  }
-}
-```
-
-There is nothing technically wrong with this code for a small prototype.
-
-The problem appears when the application grows.
-
-The widget now knows about:
-
-* HTTP
-* URLs
-* request serialization
-* response serialization
-* authentication
-* persistence
-* application state
-* navigation
-
-Changing any of those concerns can require modifying presentation code.
-
-A more maintainable design establishes boundaries:
-
-```text
-User interaction
-      ↓
-Presentation state
-      ↓
-Application/domain operation
-      ↓
-Repository
-      ↓
-Data source
-      ↓
-External system
-```
-
-The UI asks the application to perform an operation.
-
-The application decides what that operation means.
-
-The repository provides the required data boundary.
-
-The data source handles infrastructure.
-
-That separation is the useful part of Clean Architecture.
-
-## Clean Architecture Is Not a Folder Template
-
-One of the most common misunderstandings is that Clean Architecture means creating three directories:
-
-```text
-presentation/
-domain/
-data/
-```
-
-and considering the architecture complete.
-
-A folder structure can communicate intent, but it does not enforce dependencies.
-
-A project can have:
-
-```text
-lib/
-├── presentation/
-├── domain/
-└── data/
-```
-
-while still having:
-
-* HTTP calls inside widgets
-* business rules inside controllers
-* SQL queries inside domain classes
-* API models exposed to every layer
-* repositories performing UI navigation
-
-That is not a clean separation simply because the files are in different directories.
-
-The more useful definition is:
-
-> Clean Architecture separates responsibilities and makes dependencies point toward stable application concepts rather than toward replaceable infrastructure.
-
-The exact directory names are secondary.
-
-## When Clean Architecture Is Worth the Complexity
-
-Architecture has a cost.
-
-Every abstraction introduces something developers have to understand.
-
-A small application might reasonably look like:
-
-```text
-Screen
-  ↓
-Service
-  ↓
-API
-```
-
-If there are only a few screens, little business logic, and one simple data source, introducing entities, repository interfaces, use cases, multiple data-source abstractions, and dependency-injection layers may make the project harder to understand.
-
-Clean Architecture becomes more valuable when the application has characteristics such as:
-
-* substantial business rules
-* multiple features
-* multiple developers
-* long-term maintenance
-* multiple data sources
-* offline requirements
-* complex state transitions
-* extensive automated testing
-* external service integrations
-* frequently changing infrastructure
-* a significant expected product lifetime
-
-The right question is therefore not:
-
-> "Does every Flutter application need Clean Architecture?"
-
-It is:
-
-> "Where will architectural boundaries reduce the cost of future change?"
-
-That distinction prevents architecture from becoming ceremony.
-
-## A Practical Feature-Based Project Structure
-
-For a growing Flutter application, feature-based organization is often easier to maintain than a collection of large global folders.
-
-A project might look like:
-
-```text
-lib/
-├── core/
-│   ├── error/
-│   ├── network/
-│   ├── routing/
-│   └── utilities/
-│
-├── features/
-│   ├── authentication/
-│   │   ├── data/
-│   │   ├── domain/
-│   │   └── presentation/
-│   │
-│   ├── profile/
-│   │   ├── data/
-│   │   ├── domain/
-│   │   └── presentation/
-│   │
-│   └── orders/
-│       ├── data/
-│       ├── domain/
-│       └── presentation/
-│
-└── main.dart
-```
-
-Inside a more complex feature, the layers can be expanded:
-
-```text
-authentication/
-├── data/
-│   ├── datasources/
-│   ├── models/
-│   └── repositories/
-│
-├── domain/
-│   ├── entities/
-│   ├── repositories/
-│   └── usecases/
-│
-└── presentation/
-    ├── pages/
-    ├── widgets/
-    └── state/
-```
-
-This organization gives developers two useful pieces of information immediately:
-
-1. Which feature does this code belong to?
-2. What responsibility does this code have?
-
-That becomes increasingly valuable as the project grows.
-
-However, do not create every directory automatically.
-
-A simple feature may need only:
-
-```text
-feature/
-├── presentation/
-└── data/
-```
-
-while a complex feature may genuinely need all three layers.
-
-The structure should reflect actual complexity.
-
-## The Domain Layer
-
-The domain layer contains concepts and rules that are meaningful to the application itself.
-
-It should have as few dependencies on Flutter and infrastructure as practical.
-
-Typical domain components include:
-
-* entities
-* repository contracts
-* use cases
-* value objects
-* business rules
-
-The domain layer is where the application should be able to express what it means to perform an operation without knowing every detail about how that operation is implemented.
-
-### Entities
-
-An entity represents an important concept in the application.
-
-For example:
-
-```dart
-class User {
-  const User({
-    required this.id,
-    required this.name,
-    required this.email,
-  });
-
-  final String id;
-  final String name;
-  final String email;
-}
-```
-
-This object does not need to know whether the user came from:
-
-* REST
-* GraphQL
-* SQLite
-* Firebase
-* an in-memory test
-* a local cache
-
-It represents the application-level concept of a user.
-
-### Repository Contracts
-
-The domain can also define what data it needs.
-
-```dart
-abstract interface class UserRepository {
-  Future<User> getUser(String id);
-}
-```
-
-This contract says:
-
-> The application needs a way to retrieve a user.
-
-It does not say:
-
-> Use a specific HTTP client.
-
-It does not say:
-
-> Use REST.
-
-It does not say:
-
-> Use SQLite.
-
-Those are implementation decisions.
-
-The domain should describe the requirement without unnecessarily coupling itself to the implementation.
-
-## The Data Layer
-
-The data layer handles infrastructure-specific concerns.
-
-Typical responsibilities include:
-
-* API requests
-* JSON serialization
-* local databases
-* API models
-* repository implementations
-* local and remote data sources
-* caching
-* persistence
-* mapping external data into application concepts
-
-Suppose the domain defines:
-
-```dart
-abstract interface class UserRepository {
-  Future<User> getUser(String id);
-}
-```
-
-The data layer can implement it:
-
-```dart
-class UserRepositoryImpl implements UserRepository {
-  const UserRepositoryImpl(this.remoteDataSource);
-
-  final UserRemoteDataSource remoteDataSource;
-
-  @override
-  Future<User> getUser(String id) async {
-    final model = await remoteDataSource.getUser(id);
-
-    return model.toEntity();
-  }
-}
-```
-
-The domain sees:
-
-```text
-UserRepository
-```
-
-The data layer sees:
-
-```text
-HTTP
-JSON
-API models
-serialization
-network errors
-```
-
-That is a useful boundary because infrastructure can change without automatically forcing changes through the application's core logic.
-
-## Entities and API Models Are Different Concepts
-
-External systems frequently use representations that are not ideal for the rest of the application.
-
-An API might return:
-
-```json
-{
-  "id": "42",
-  "full_name": "Asha Sharma",
-  "email_address": "asha@example.com"
-}
-```
-
-A data model can represent that external contract:
-
-```dart
-class UserModel {
-  const UserModel({
-    required this.id,
-    required this.fullName,
+// DATA LAYER: lib/features/profile/data/models/user_profile_dto.dart
+import '../../domain/entities/user_profile.dart';
+
+class UserProfileDto {
+  const UserProfileDto({
+    required this.userId,
+    required this.userName,
     required this.emailAddress,
+    required this.emailVerifiedAt,
+    required this.registeredTimestampMs,
   });
 
-  final String id;
-  final String fullName;
+  final String userId;
+  final String userName;
   final String emailAddress;
+  final String? emailVerifiedAt;
+  final int registeredTimestampMs;
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
-      id: json['id'] as String,
-      fullName: json['full_name'] as String,
+  factory UserProfileDto.fromJson(Map<String, dynamic> json) {
+    return UserProfileDto(
+      userId: json['user_id'] as String,
+      userName: json['user_name'] as String,
       emailAddress: json['email_address'] as String,
+      emailVerifiedAt: json['email_verified_at'] as String?,
+      registeredTimestampMs: json['registered_timestamp_ms'] as int,
     );
   }
 
-  User toEntity() {
-    return User(
-      id: id,
-      name: fullName,
+  Map<String, dynamic> toJson() {
+    return {
+      'user_id': userId,
+      'user_name': userName,
+      'email_address': emailAddress,
+      'email_verified_at': emailVerifiedAt,
+      'registered_timestamp_ms': registeredTimestampMs,
+    };
+  }
+
+  /// Maps infrastructure wire representations to pure domain models.
+  UserProfile toDomain() {
+    return UserProfile(
+      id: userId,
+      username: userName,
       email: emailAddress,
+      isVerified: emailVerifiedAt != null,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(
+        registeredTimestampMs,
+        isUtc: true,
+      ),
     );
   }
 }
 ```
 
-The domain can then work with:
+The domain layer receives a sanitized, strongly typed `UserProfile` entity:
 
 ```dart
-class User {
-  const User({
+// DOMAIN LAYER: lib/features/profile/domain/entities/user_profile.dart
+class UserProfile {
+  const UserProfile({
     required this.id,
-    required this.name,
+    required this.username,
     required this.email,
+    required this.isVerified,
+    required this.createdAt,
   });
 
   final String id;
-  final String name;
+  final String username;
   final String email;
+  final bool isVerified;
+  final DateTime createdAt;
+
+  /// Business invariant encapsulated within the entity.
+  bool get canPerformPrivilegedOperations => isVerified;
 }
 ```
 
-If the backend later changes the JSON representation, the impact can remain mostly inside the data boundary.
+If the remote API refactors its wire contract (for example, replacing `registered_timestamp_ms` with an ISO-8601 string `created_at`), only `UserProfileDto.fromJson` and `toDomain()` must change. Not a single Use Case, ViewModel, or UI Widget requires modification.
 
-But this does not mean every project must have a separate model and entity for every object.
+---
 
-If there is no meaningful distinction between the external representation and the application's representation, maintaining two classes may only create boilerplate.
+## 3. Functional Error Handling with Dart 3 Sealed Classes
 
-Use the separation when it protects a real boundary.
+In unprincipled codebases, error handling is often left to unchecked runtime exceptions. A network client throws a `SocketException`, a JSON parser throws a `FormatException`, and a database driver throws a `SqliteException`. These low-level infrastructure exceptions leak up the stack, crashing widgets during layout or forcing UI controllers to wrap every call in unwieldy `try/catch` blocks.
 
-## What a Repository Should Actually Do
+In Clean Architecture, **exceptions belong to infrastructure**. They must be caught at the adapter boundary (the Data layer) and translated into typed **Domain Failures** using functional programming constructs.
 
-A repository should not exist merely to wrap another method.
+### Dart 3 Sealed Class Result Hierarchy
 
-For example:
+Dart 3 introduced sealed classes, providing native algebraic data types and compile-time exhaustive pattern matching. We define a generic `Result<T, E>` type that explicitly represents either a successful computation or a domain failure:
 
 ```dart
-class UserRepository {
-  Future<User> getUser(String id) {
-    return api.getUser(id);
+// CORE: lib/core/result/result.dart
+sealed class Result<T, E> {
+  const Result();
+}
+
+final class Success<T, E> extends Result<T, E> {
+  const Success(this.data);
+  final T data;
+}
+
+final class Failure<T, E> extends Result<T, E> {
+  const Failure(this.error);
+  final E error;
+}
+```
+
+Next, we establish a structured domain failure hierarchy:
+
+```dart
+// DOMAIN LAYER: lib/core/error/domain_failure.dart
+sealed class DomainFailure {
+  const DomainFailure(this.message);
+  final String message;
+}
+
+final class NetworkFailure extends DomainFailure {
+  const NetworkFailure([super.message = 'Network connection unavailable. Please check your connectivity.']);
+}
+
+final class ServerFailure extends DomainFailure {
+  const ServerFailure({
+    required this.statusCode,
+    String message = 'The remote server encountered an error.',
+  }) : super(message);
+
+  final int statusCode;
+}
+
+final class CacheFailure extends DomainFailure {
+  const CacheFailure([super.message = 'Requested entity not found in local cache.']);
+}
+
+final class ValidationFailure extends DomainFailure {
+  const ValidationFailure(super.message);
+}
+```
+
+### Infrastructure Exceptions vs. Domain Failures
+
+| Condition / Exception | Originating Layer | Handled In | Mapped Domain Failure | Presentation Impact |
+| :--- | :--- | :--- | :--- | :--- |
+| `SocketException` / `TimeoutException` | HTTP Client / Network I/O | Data Layer (`RepositoryImpl`) | `NetworkFailure` | Displays offline warning or persistent retry banner. |
+| `HttpException` (HTTP 500 / 502 / 503) | Remote REST Server | Data Layer (`RepositoryImpl`) | `ServerFailure(statusCode: 500)` | Prompts user to retry after a short interval. |
+| `FormatException` / Missing Key | JSON Parser / Deserialization | Data Layer (`RepositoryImpl`) | `ServerFailure(statusCode: 422)` | Logs payload error to telemetry; displays non-crashing generic error. |
+| Missing Database Row | SQLite / Hive Local Cache | Data Layer (`RepositoryImpl`) | `CacheFailure` | Triggers background network refresh or empty state. |
+| Malformed User Input | Use Case / Interactor | Domain Layer (`UseCase`) | `ValidationFailure` | Highlights invalid input field directly in form UI. |
+
+By catching infrastructure exceptions within the repository implementation and returning a `Result<T, DomainFailure>`, our method signatures become self-documenting:
+
+```dart
+// The caller is forced by the Dart type system to handle both branches.
+Future<Result<UserProfile, DomainFailure>> getProfile(String userId);
+```
+
+---
+
+## 4. Complete End-to-End Vertical Slice
+
+To understand how these principles unify in production, let us implement a complete vertical slice: fetching a user's profile.
+
+### Architectural Flow of the Vertical Slice
+
+```text
+[ User Tap ]
+     │
+     ▼
+[ ProfileScreen Widget ]
+     │ invokes loadProfile()
+     ▼
+[ ProfileNotifier (Controller) ]
+     │ invokes call()
+     ▼
+[ GetUserProfileUseCase ]
+     │ invokes getProfile()
+     ▼
+[ ProfileRepository (Interface) ]
+     ▲
+     │ implements contract
+[ ProfileRepositoryImpl ]
+     │ catches SocketException / FormatException
+     ▼
+[ ProfileRemoteDataSource ] ──> [ HTTP Network ]
+     │ returns JSON
+     ▼
+[ UserProfileDto ] ──( .toDomain() )──> [ UserProfile Entity ]
+     │
+     ▼
+[ Result.Success(UserProfile) ]
+     │ returned up the stack
+     ▼
+[ ProfileNotifier: ProfileLoaded State ]
+     │ notifyListeners()
+     ▼
+[ ProfileScreen Widget Rebuilds ]
+```
+
+### 1. Domain Layer: Entity, Repository Port, and Use Case
+
+The Domain layer defines the business contract and execution rules with zero third-party or Flutter framework dependencies:
+
+```dart
+// lib/features/profile/domain/repositories/profile_repository.dart
+import '../../../../core/error/domain_failure.dart';
+import '../../../../core/result/result.dart';
+import '../entities/user_profile.dart';
+
+abstract interface class ProfileRepository {
+  Future<Result<UserProfile, DomainFailure>> getProfile(String userId);
+}
+```
+
+```dart
+// lib/features/profile/domain/usecases/get_user_profile_use_case.dart
+import '../../../../core/error/domain_failure.dart';
+import '../../../../core/result/result.dart';
+import '../entities/user_profile.dart';
+import '../repositories/profile_repository.dart';
+
+class GetUserProfileUseCase {
+  const GetUserProfileUseCase(this._repository);
+
+  final ProfileRepository _repository;
+
+  Future<Result<UserProfile, DomainFailure>> call(String userId) async {
+    final trimmedId = userId.trim();
+    if (trimmedId.isEmpty) {
+      return const Failure(
+        ValidationFailure('User identifier cannot be empty or whitespace.'),
+      );
+    }
+
+    return _repository.getProfile(trimmedId);
   }
 }
 ```
 
-may not provide much value if it simply forwards the request.
+### 2. Data Layer: Data Source, DTO, and Repository Adapter
 
-A repository becomes more useful when it represents an application-oriented data boundary.
-
-For example:
+The Data layer handles HTTP communication, catches raw I/O exceptions, and maps payloads into domain entities:
 
 ```dart
-abstract interface class ProductRepository {
-  Future<List<Product>> getProducts();
-  Future<Product> getProduct(String id);
+// lib/features/profile/data/datasources/profile_remote_data_source.dart
+import 'dart:convert';
+import 'dart:io';
+import '../models/user_profile_dto.dart';
+
+abstract interface class ProfileRemoteDataSource {
+  Future<UserProfileDto> fetchProfile(String userId);
 }
-```
 
-The implementation could coordinate multiple sources:
+class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
+  const ProfileRemoteDataSourceImpl({required this.client, required this.baseUrl});
 
-```text
-             ProductRepository
-                    │
-          ┌─────────┴─────────┐
-          ↓                   ↓
-     Local cache          Remote API
-```
+  final HttpClient client;
+  final String baseUrl;
 
-The repository could decide whether to:
-
-* return cached data
-* request fresh data
-* update local storage
-* merge local and remote state
-* translate infrastructure failures
-* handle retry behavior
-
-The rest of the application does not need to understand those implementation details.
-
-That is a meaningful abstraction.
-
-## Use Cases Should Represent Meaningful Operations
-
-A use case is useful when it gives an important application operation a clear home.
-
-For example:
-
-```dart
-class GetUser {
-  const GetUser(this.repository);
-
-  final UserRepository repository;
-
-  Future<User> call(String id) {
-    return repository.getUser(id);
-  }
-}
-```
-
-This particular operation is intentionally simple.
-
-A more involved example shows why the boundary can matter:
-
-```dart
-class SubmitOrder {
-  const SubmitOrder(
-    this.orderRepository,
-    this.inventoryRepository,
-    this.paymentService,
-  );
-
-  final OrderRepository orderRepository;
-  final InventoryRepository inventoryRepository;
-  final PaymentService paymentService;
-
-  Future<Order> call(OrderDraft draft) async {
-    // Validate order.
-    // Check inventory.
-    // Process payment.
-    // Create order.
-    // Return order.
-  }
-}
-```
-
-The operation coordinates multiple dependencies and business decisions.
-
-That behavior now has an obvious location.
-
-However, not every function deserves its own use-case class.
-
-Creating separate classes for:
-
-```text
-GetUserName
-GetUserEmail
-GetUserId
-```
-
-when each simply returns one property can create unnecessary complexity.
-
-A useful rule is:
-
-> Introduce a use case when it represents meaningful application behavior, not simply because every method can be wrapped in a class.
-
-## The Presentation Layer
-
-The presentation layer communicates with the user.
-
-It commonly contains:
-
-* pages
-* widgets
-* presentation state
-* controllers
-* notifiers
-* Blocs
-* UI-specific formatting
-* navigation decisions
-
-A useful flow is:
-
-```text
-User interaction
-      ↓
-Presentation state
-      ↓
-Application operation
-      ↓
-Repository
-      ↓
-Data source
-```
-
-The result returns through the same boundaries:
-
-```text
-Data source
-      ↓
-Repository
-      ↓
-Application operation
-      ↓
-Presentation state
-      ↓
-Widget
-```
-
-The widget therefore does not need to understand the complete data-access process.
-
-## State Management Is Not the Entire Architecture
-
-Flutter applications often use a state-management solution such as Riverpod, Bloc, Provider, or another approach.
-
-These tools solve presentation-state problems.
-
-They do not automatically solve application architecture.
-
-A controller can still become an enormous class containing:
-
-```text
-API calls
-business rules
-validation
-database operations
-serialization
-navigation
-UI state
-```
-
-Using a state-management library does not make those responsibilities independent.
-
-A better separation is:
-
-```text
-Controller / Notifier / Bloc
-          ↓
-     Use case
-          ↓
-     Repository
-```
-
-The presentation layer manages states such as:
-
-```text
-initial
-loading
-success
-error
-```
-
-while the underlying application logic determines what should actually happen.
-
-The state-management technology can change without forcing the entire domain model to change.
-
-## Dependency Injection
-
-Once responsibilities are separated, dependencies need to be assembled.
-
-Consider:
-
-```dart
-class GetUser {
-  const GetUser(this.repository);
-
-  final UserRepository repository;
-}
-```
-
-The use case receives its dependency.
-
-It does not construct it.
-
-Avoid tightly coupling the use case to a specific implementation:
-
-```dart
-class GetUser {
-  final repository = UserRepositoryImpl(
-    UserApiClient(),
-  );
-}
-```
-
-That design makes substitution harder.
-
-Instead, dependencies can be assembled at the application's composition boundary:
-
-```text
-UserRemoteDataSource
-        ↓
-UserRepositoryImpl
-        ↓
-GetUser
-        ↓
-ProfileController
-```
-
-The concrete implementation can be selected there.
-
-This becomes particularly useful for testing because a real repository can be replaced with a fake implementation.
-
-Dependency injection does not necessarily require a large framework.
-
-For smaller applications, manually constructing the dependency graph can be perfectly reasonable.
-
-The important principle is:
-
-> A component should receive the dependencies it needs rather than secretly constructing infrastructure inside itself.
-
-## Testing the Domain Without Flutter
-
-One of the strongest benefits of clear boundaries is testability.
-
-Suppose the application depends on:
-
-```dart
-abstract interface class UserRepository {
-  Future<User> getUser(String id);
-}
-```
-
-A test can provide a fake:
-
-```dart
-class FakeUserRepository implements UserRepository {
   @override
-  Future<User> getUser(String id) async {
-    return const User(
-      id: '1',
-      name: 'Test User',
-      email: 'test@example.com',
-    );
+  Future<UserProfileDto> fetchProfile(String userId) async {
+    final uri = Uri.parse('$baseUrl/v1/users/$userId');
+    final request = await client.getUrl(uri);
+    request.headers.set('Accept', 'application/json');
+    
+    final response = await request.close();
+    if (response.statusCode == 200) {
+      final responseBody = await response.transform(utf8.decoder).join();
+      final Map<String, dynamic> json = jsonDecode(responseBody) as Map<String, dynamic>;
+      return UserProfileDto.fromJson(json);
+    } else {
+      throw HttpException('Server responded with HTTP status ${response.statusCode}');
+    }
   }
 }
 ```
 
-Now an application operation can be tested without:
+```dart
+// lib/features/profile/data/repositories/profile_repository_impl.dart
+import 'dart:async';
+import 'dart:io';
+import '../../../../core/error/domain_failure.dart';
+import '../../../../core/result/result.dart';
+import '../../domain/entities/user_profile.dart';
+import '../../domain/repositories/profile_repository.dart';
+import '../datasources/profile_remote_data_source.dart';
 
-* rendering a widget
-* starting an HTTP server
-* connecting to a database
-* requiring network access
-* configuring authentication
+class ProfileRepositoryImpl implements ProfileRepository {
+  const ProfileRepositoryImpl({required this.remoteDataSource});
 
-This produces faster and more focused tests.
+  final ProfileRemoteDataSource remoteDataSource;
 
-A mature Flutter application can use several testing levels.
+  @override
+  Future<Result<UserProfile, DomainFailure>> getProfile(String userId) async {
+    try {
+      final dto = await remoteDataSource.fetchProfile(userId);
+      return Success(dto.toDomain());
+    } on SocketException catch (e) {
+      return Failure(NetworkFailure('Network unreachable: ${e.message}'));
+    } on TimeoutException {
+      return const Failure(NetworkFailure('Request timed out while contacting server.'));
+    } on HttpException catch (e) {
+      return Failure(ServerFailure(
+        statusCode: 500,
+        message: 'Server error: ${e.message}',
+      ));
+    } on FormatException catch (e) {
+      return Failure(ServerFailure(
+        statusCode: 422,
+        message: 'Malformed response payload: ${e.message}',
+      ));
+    } catch (e) {
+      return Failure(ServerFailure(
+        statusCode: 500,
+        message: 'Unexpected infrastructure failure: $e',
+      ));
+    }
+  }
+}
+```
 
-### Domain tests
+### 3. Presentation Layer: State Machine, Controller, and Reactive Widget
 
-Test:
-
-* business rules
-* calculations
-* validation
-* state-independent application behavior
-
-### Data tests
-
-Test:
-
-* serialization
-* API mapping
-* repository behavior
-* cache behavior
-
-### Widget tests
-
-Test:
-
-* rendering
-* interaction
-* presentation states
-
-### Integration tests
-
-Test:
-
-* important end-to-end user flows
-* real integration between major application components
-
-The goal is not to maximize the number of tests.
-
-The goal is to put each test at the layer where it can verify behavior efficiently.
-
-## Error Handling Across Boundaries
-
-Production applications have many ways to fail.
-
-A request can time out.
-
-An API can return an unexpected status code.
-
-Authentication can expire.
-
-A database can be unavailable.
-
-A response can contain invalid data.
-
-Infrastructure-specific exceptions should not necessarily leak through the entire application.
-
-A project might define application-level failures:
+The Presentation layer models UI state with sealed classes and renders the interface using exhaustive pattern matching:
 
 ```dart
-sealed class AppFailure {
-  const AppFailure();
+// lib/features/profile/presentation/state/profile_state.dart
+import '../../domain/entities/user_profile.dart';
+
+sealed class ProfileState {
+  const ProfileState();
 }
 
-final class NetworkFailure extends AppFailure {
-  const NetworkFailure();
+final class ProfileInitial extends ProfileState {
+  const ProfileInitial();
 }
 
-final class UnauthorizedFailure extends AppFailure {
-  const UnauthorizedFailure();
+final class ProfileLoading extends ProfileState {
+  const ProfileLoading();
 }
 
-final class ValidationFailure extends AppFailure {
-  const ValidationFailure(this.message);
+final class ProfileLoaded extends ProfileState {
+  const ProfileLoaded(this.profile);
+  final UserProfile profile;
+}
 
+final class ProfileError extends ProfileState {
+  const ProfileError(this.message);
   final String message;
 }
 ```
 
-The exact design depends on the application.
+```dart
+// lib/features/profile/presentation/controllers/profile_notifier.dart
+import 'package:flutter/foundation.dart';
+import '../../../../core/result/result.dart';
+import '../../domain/usecases/get_user_profile_use_case.dart';
+import '../state/profile_state.dart';
 
-The important principle is that low-level implementation errors should be translated at a suitable boundary.
+class ProfileNotifier extends ChangeNotifier {
+  ProfileNotifier(this._getUserProfileUseCase);
 
-For example, the presentation layer should not need to know the internal exception hierarchy of an HTTP library simply to display:
+  final GetUserProfileUseCase _getUserProfileUseCase;
 
-> Unable to connect. Please try again.
+  ProfileState _state = const ProfileInitial();
+  ProfileState get state => _state;
 
-This separation also makes failure behavior easier to test.
+  Future<void> loadProfile(String userId) async {
+    _state = const ProfileLoading();
+    notifyListeners();
 
-## Keep Business Rules Out of Widgets
+    final result = await _getUserProfileUseCase(userId);
 
-Imagine an ordering application where an order can only be submitted when:
-
-* the cart contains at least one item
-* inventory is available
-* the account is eligible
-* payment information is valid
-
-Those are application rules.
-
-If they are implemented directly in a widget, they become tied to that particular screen.
-
-Another screen may eventually need the same rule.
-
-A background operation may need it too.
-
-A test should be able to verify it without constructing the screen.
-
-Business rules therefore belong in a more stable application or domain boundary.
-
-The presentation layer should request the operation and react to its result.
-
-This distinction becomes increasingly valuable as more features depend on the same rules.
-
-## Feature-Based Architecture Helps Large Codebases
-
-A global structure such as:
-
-```text
-lib/
-├── screens/
-├── widgets/
-├── models/
-├── repositories/
-├── services/
-└── controllers/
-```
-
-can work for a small application.
-
-As the application grows, however, these directories can become enormous.
-
-A feature-oriented structure instead groups concepts:
-
-```text
-features/
-├── authentication/
-├── profile/
-├── products/
-├── orders/
-└── payments/
-```
-
-Each feature can then establish its own boundaries.
-
-This makes it easier to answer:
-
-> "Where is everything related to orders?"
-
-without searching through unrelated global directories.
-
-It also reduces accidental coupling because developers can see which code belongs to which feature.
-
-## Shared Core Code Requires Discipline
-
-Feature-based architecture does not mean every piece of code should be duplicated.
-
-Some functionality genuinely belongs in shared infrastructure:
-
-```text
-core/
-├── networking/
-├── errors/
-├── routing/
-└── utilities/
-```
-
-But a common mistake is turning `core` into a dumping ground.
-
-If every new class is placed in:
-
-```text
-core/
-```
-
-simply because multiple features might eventually use it, the project slowly loses its boundaries.
-
-A good test is:
-
-> Is this truly generic infrastructure, or does it actually belong to a specific feature?
-
-For example, an authentication policy probably belongs to authentication.
-
-A generic HTTP client may belong to shared infrastructure.
-
-Keeping that distinction clear prevents the shared layer from becoming another giant dependency.
-
-## Offline-First Applications
-
-Repository boundaries become particularly useful when an application needs offline support.
-
-A repository might coordinate:
-
-```text
-Repository
-    │
-    ├── Local data source
-    │
-    └── Remote data source
-```
-
-A read operation could work like:
-
-```text
-Request data
-      ↓
-Check local cache
-      ↓
-Cache usable?
-   /       \
- yes        no
- ↓           ↓
-return    Remote API
-             ↓
-          Save locally
-             ↓
-           return
-```
-
-The domain does not need to know that a cache exists.
-
-That allows storage strategies to evolve independently from application rules.
-
-More advanced products can extend this approach to:
-
-* background synchronization
-* stale-while-revalidate behavior
-* optimistic updates
-* conflict resolution
-* queued mutations
-* synchronization status
-
-But those mechanisms should be introduced because the product needs them, not simply because the architecture permits them.
-
-## Handling API Changes
-
-One practical benefit of boundaries becomes obvious when an API changes.
-
-Suppose an endpoint originally returns:
-
-```json
-{
-  "name": "Asha"
+    _state = switch (result) {
+      Success(:final data) => ProfileLoaded(data),
+      Failure(:final error) => ProfileError(error.message),
+    };
+    notifyListeners();
+  }
 }
 ```
-
-and later changes to:
-
-```json
-{
-  "display_name": "Asha Sharma"
-}
-```
-
-If the raw API response is used directly throughout the application, the change can spread into:
-
-* widgets
-* state classes
-* business logic
-* tests
-* persistence
-
-If the external representation is isolated within the data layer, the transformation can often remain localized.
-
-The domain can continue to work with:
 
 ```dart
-class User {
-  final String name;
+// lib/features/profile/presentation/pages/profile_screen.dart
+import 'package:flutter/material.dart';
+import '../controllers/profile_notifier.dart';
+import '../state/profile_state.dart';
+
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({
+    super.key,
+    required this.notifier,
+    required this.userId,
+  });
+
+  final ProfileNotifier notifier;
+  final String userId;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: notifier,
+      builder: (context, _) {
+        return Scaffold(
+          appBar: AppBar(title: const Text('User Profile')),
+          body: switch (notifier.state) {
+            ProfileInitial() => Center(
+                child: ElevatedButton(
+                  onPressed: () => notifier.loadProfile(userId),
+                  child: const Text('Load Profile'),
+                ),
+              ),
+            ProfileLoading() => const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ProfileLoaded(:final profile) => Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      profile.username,
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    Text('Email: ${profile.email}'),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Account Status: ${profile.isVerified ? "Verified" : "Pending Verification"}',
+                    ),
+                    const SizedBox(height: 16),
+                    if (profile.canPerformPrivilegedOperations)
+                      ElevatedButton(
+                        onPressed: () {
+                          // Perform administrative action
+                        },
+                        child: const Text('Access Admin Settings'),
+                      ),
+                  ],
+                ),
+              ),
+            ProfileError(:final message) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        message,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => notifier.loadProfile(userId),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          },
+        );
+      },
+    );
+  }
 }
 ```
 
-The API contract and application model are allowed to evolve independently.
+---
 
-This is one reason boundaries matter more than the number of classes.
+## 5. Dependency Injection and the Composition Root
 
-## Architecture Does Not Automatically Make an Application Faster
+A component must never construct its own dependencies. If `GetUserProfileUseCase` instantiated `ProfileRepositoryImpl`, the Domain layer would instantly become tightly coupled to the Data layer, violating the Dependency Inversion Principle.
 
-Clean Architecture is often associated with large applications, and that sometimes leads to another misconception: that the architecture itself provides performance.
+Instead, dependencies must be instantiated and wired together at the **Composition Root**—the outermost boundary where the application bootstraps (typically `main.dart` or dedicated feature service modules).
 
-It does not.
+```text
+COMPOSITION ROOT (main.dart / AppBootstrap)
+  │
+  ├── 1. Instantiate Core Infrastructure (HttpClient, Database)
+  ├── 2. Instantiate Remote/Local DataSources (ProfileRemoteDataSourceImpl)
+  ├── 3. Instantiate Repositories (ProfileRepositoryImpl as ProfileRepository)
+  ├── 4. Instantiate Use Cases (GetUserProfileUseCase)
+  └── 5. Inject into Presentation Notifiers / Widgets (ProfileNotifier)
+```
 
-An application can have excellent separation and still suffer from:
-
-* excessive widget rebuilds
-* inefficient list rendering
-* oversized images
-* slow startup
-* excessive network requests
-* poor database queries
-* memory leaks
-* expensive computations on the UI isolate
-
-Performance requires separate engineering work.
-
-Similarly, Clean Architecture does not automatically make a backend scalable.
-
-Its primary benefits are:
-
-* separation of responsibilities
-* dependency control
-* maintainability
-* testability
-* easier replacement of infrastructure
-* clearer ownership of application behavior
-
-Those are valuable benefits, but they should not be confused with performance optimization.
-
-## Avoiding the "Everything Must Be an Interface" Trap
-
-An interface is useful when it creates a meaningful boundary.
-
-For example:
+Whether your team uses manual constructor injection, a service locator such as `get_it`, or dependency providers such as Riverpod, the dependency flow remains identical:
 
 ```dart
-abstract interface class PaymentGateway {
-  Future<PaymentResult> charge(PaymentRequest request);
+// lib/injection_container.dart
+import 'dart:io';
+import 'features/profile/data/datasources/profile_remote_data_source.dart';
+import 'features/profile/data/repositories/profile_repository_impl.dart';
+import 'features/profile/domain/repositories/profile_repository.dart';
+import 'features/profile/domain/usecases/get_user_profile_use_case.dart';
+import 'features/profile/presentation/controllers/profile_notifier.dart';
+
+class ServiceLocator {
+  static ProfileNotifier createProfileNotifier({required String apiBaseUrl}) {
+    // 1. Data Source
+    final ProfileRemoteDataSource remoteDataSource = ProfileRemoteDataSourceImpl(
+      client: HttpClient(),
+      baseUrl: apiBaseUrl,
+    );
+
+    // 2. Repository Implementation wired to Repository Interface
+    final ProfileRepository repository = ProfileRepositoryImpl(
+      remoteDataSource: remoteDataSource,
+    );
+
+    // 3. Domain Use Case
+    final getUserProfileUseCase = GetUserProfileUseCase(repository);
+
+    // 4. Presentation Notifier
+    return ProfileNotifier(getUserProfileUseCase);
+  }
 }
 ```
 
-makes sense if the application may work with different implementations or if the boundary needs to be isolated in tests.
+During automated testing, this structure allows swapping `ProfileRemoteDataSourceImpl` or `ProfileRepositoryImpl` with in-memory test doubles without altering a single line of domain or presentation code.
 
-But creating:
+---
 
-```text
-IUserFormatter
-IUserMapper
-IUserValidator
-IUserHelper
-```
+## 6. Anti-Patterns and Over-Engineering Traps
 
-for every small class does not automatically improve the architecture.
+Clean Architecture is a powerful tool, but when applied mechanically without pragmatic judgment, it can lead to unnecessary complexity, code bloat, and developer fatigue.
 
-Each abstraction creates:
+### Trap 1: The Pass-Through / Anemic Use Case
 
-* another file
-* another name
-* another dependency
-* another concept developers must understand
-
-Abstraction should therefore have a reason.
-
-Ask:
-
-> What change does this boundary protect us from?
-
-If the answer is unclear, the abstraction may not be necessary.
-
-## Avoiding the "Everything Must Be a Use Case" Trap
-
-The same principle applies to use cases.
-
-An operation such as:
-
-```text
-SubmitOrder
-CancelOrder
-UpdateProfile
-ResetPassword
-```
-
-usually has meaningful application behavior.
-
-But wrapping trivial property access behind individual use-case classes can create unnecessary indirection.
-
-The architecture should make important behavior easier to locate.
-
-It should not make straightforward code harder to follow.
-
-## What About Navigation?
-
-Navigation is usually a presentation concern because it describes how the user moves through the interface.
-
-A business operation should ideally not need to know that a particular screen exists.
-
-For example, domain code should not contain:
+An anemic use case is an interactor that does nothing except forward a parameter to a repository method:
 
 ```dart
-Navigator.push(...)
+// ❌ ANTI-PATTERN: Zero business logic, pure ceremony
+class GetUserProfileUseCase {
+  const GetUserProfileUseCase(this.repository);
+  final ProfileRepository repository;
+
+  Future<Result<UserProfile, DomainFailure>> call(String id) {
+    return repository.getProfile(id);
+  }
+}
 ```
 
-Instead, an application operation can return a meaningful result:
+If an application features 80 standard CRUD endpoints with zero domain validation, zero coordination, and zero authorization logic, creating 80 single-line use case classes adds architectural friction without delivering value.
+
+### When to Use vs. Bypass Explicit Use Cases
+
+| Scenario | Recommendation | Architectural Rationale | Trade-off |
+| :--- | :--- | :--- | :--- |
+| **Complex Business Workflow** (e.g., Checkout: validate cart, reserve inventory, process payment, generate invoice) | **Use Explicit Use Case** | Coordinates multiple repositories, applies validation rules, isolates complex business algorithms. | Introduces an extra class, but concentrates high-risk policies into a single, testable unit. |
+| **Simple CRUD Read/Write** (e.g., fetch static FAQ list, toggle user notification preference flag) | **Bypass Use Case** (Call Repository directly from ViewModel/Notifier) | No domain logic exists. A use case would merely duplicate the repository interface signature. | Removes boilerplate. If business rules emerge later, a use case can be introduced incrementally. |
+| **Multi-Source Data Synchronization** (e.g., check local SQLite cache; if expired, fetch REST API and save locally) | **Encapsulate in Repository** | Caching and data sync strategies are data-access concerns, not domain business rules. | Keeps the repository contract clean while shielding both use cases and presentation from storage decisions. |
+| **Input Formatting and UI Validation** (e.g., checking if email text field contains `@`) | **Handle in Presentation** | Visual feedback and keyboard event handling are presentation concerns, not enterprise business logic. | Prevents coupling core domain layers to transient UI text-field controllers. |
+
+### Trap 2: Entity-DTO Mirroring
+
+Another common trap is blindly creating duplicate classes when an internal domain model and an external wire model have identical representations:
+
+```dart
+// Mechanical 1:1 duplication with zero distinction
+class UserDto { final String id; final String name; }
+class UserEntity { final String id; final String name; }
+```
+
+If your mobile application connects to an internal, version-controlled GraphQL or gRPC backend whose generated models already serve as clean domain representations, generating identical DTOs and manual mappers for hundreds of types is counterproductive. Establish separate DTOs when:
+- the external format is volatile or controlled by third parties;
+- data types differ (e.g., integer flags vs. rich Dart enums);
+- domain entities enforce business invariants that raw data models cannot guarantee.
+
+### Trap 3: Treating State Management as Architecture
+
+Teams frequently confuse state management libraries (Bloc, Riverpod, MobX) with application architecture. A team might claim: *"Our app uses Bloc architecture."*
+
+State management libraries govern how UI widgets react to state changes over time. They reside entirely within the **Presentation Layer**. If your Bloc or Riverpod Notifier makes direct HTTP calls, runs SQL queries, and serializes JSON payloads, your codebase lacks clean architectural boundaries regardless of how reactive the UI is. State management should consume domain use cases or repositories, not replace them.
+
+---
+
+## 7. Testing Strategy Across Layer Boundaries
+
+The ultimate metric of architectural quality is testability. In Clean Architecture, each layer is tested in isolation using the appropriate testing harness:
 
 ```text
-Authentication successful
+┌────────────────────────┬───────────────────────────┬──────────────────────┐
+│ Layer                  │ Test Type                 │ Execution Speed      │
+├────────────────────────┼───────────────────────────┼──────────────────────┤
+│ Domain (Entities,      │ Pure Dart Unit Tests      │ Extremely Fast       │
+│ UseCases)              │ (No Flutter bindings)     │ (< 1ms per test)     │
+├────────────────────────┼───────────────────────────┼──────────────────────┤
+│ Data (Repositories,    │ Adapter Unit Tests        │ Fast                 │
+│ DataSources, DTOs)     │ (Mock HTTP / In-Memory DB)│ (5-10ms per test)    │
+├────────────────────────┼───────────────────────────┼──────────────────────┤
+│ Presentation           │ Flutter Widget Tests      │ Moderate             │
+│ (Widgets, Notifiers)   │ (`testWidgets` binding)   │ (50-200ms per test)  │
+└────────────────────────┴───────────────────────────┴──────────────────────┘
 ```
 
-and the presentation layer can decide:
+### 1. Domain Test: Pure Dart Unit Test
 
-```text
-Authentication successful
-        ↓
-Navigate to dashboard
+Testing a use case requires zero mocks of Flutter UI or network engines. We provide a simple in-memory fake repository:
+
+```dart
+// test/features/profile/domain/usecases/get_user_profile_use_case_test.dart
+import 'package:flutter_test/flutter_test.dart';
+import 'package:openstair/core/error/domain_failure.dart';
+import 'package:openstair/core/result/result.dart';
+import 'package:openstair/features/profile/domain/entities/user_profile.dart';
+import 'package:openstair/features/profile/domain/repositories/profile_repository.dart';
+import 'package:openstair/features/profile/domain/usecases/get_user_profile_use_case.dart';
+
+class FakeProfileRepository implements ProfileRepository {
+  UserProfile? stubbedProfile;
+  DomainFailure? stubbedFailure;
+
+  @override
+  Future<Result<UserProfile, DomainFailure>> getProfile(String userId) async {
+    if (stubbedFailure != null) {
+      return Failure(stubbedFailure!);
+    }
+    return Success(stubbedProfile!);
+  }
+}
+
+void main() {
+  late FakeProfileRepository repository;
+  late GetUserProfileUseCase useCase;
+
+  setUp(() {
+    repository = FakeProfileRepository();
+    useCase = GetUserProfileUseCase(repository);
+  });
+
+  test('returns ValidationFailure when userId is blank', () async {
+    final result = await useCase('   ');
+
+    expect(result, isA<Failure<UserProfile, DomainFailure>>());
+    final failure = (result as Failure<UserProfile, DomainFailure>).error;
+    expect(failure, isA<ValidationFailure>());
+    expect(failure.message, contains('cannot be empty'));
+  });
+
+  test('delegates to repository when userId is valid', () async {
+    final expectedProfile = UserProfile(
+      id: 'usr-100',
+      username: 'asha_dev',
+      email: 'asha@example.com',
+      isVerified: true,
+      createdAt: DateTime.utc(2025, 1, 1),
+    );
+    repository.stubbedProfile = expectedProfile;
+
+    final result = await useCase('usr-100');
+
+    expect(result, isA<Success<UserProfile, DomainFailure>>());
+    final data = (result as Success<UserProfile, DomainFailure>).data;
+    expect(data.username, equals('asha_dev'));
+    expect(data.canPerformPrivilegedOperations, isTrue);
+  });
+}
 ```
 
-This keeps application behavior independent from the UI navigation framework.
+---
 
-## What About Validation?
+## 8. Production Verification Checklist
 
-Not all validation belongs in the same place.
+Before releasing a Flutter application built on Clean Architecture principles, verify the codebase against this production checklist:
 
-There are useful distinctions.
+- [ ] **Pure Dart Domain**: Does the `domain/` directory have zero imports of `package:flutter/*`, `dart:io`, `dart:ui`, or third-party database/HTTP packages?
+- [ ] **Strict Inward Dependencies**: Do imports in `domain/` point only to other domain files? Ensure no domain file imports from `data/` or `presentation/`.
+- [ ] **Data Transfer Isolation**: Are raw API models and database table representations (`DTOs`) confined to the `data/` layer? Ensure zero DTOs are passed into presentation widgets.
+- [ ] **Explicit Exception Boundaries**: Does the Data layer catch all low-level infrastructure exceptions (`SocketException`, `TimeoutException`, `FormatException`, `HttpException`, `SqliteException`) and convert them to typed `DomainFailure` instances?
+- [ ] **Sealed Result Outcomes**: Do repository contracts and use cases return functional `Result<T, DomainFailure>` types rather than throwing unchecked runtime exceptions?
+- [ ] **Exhaustive UI Pattern Matching**: Does the presentation layer consume UI states using exhaustive Dart 3 switch expressions (`switch (state)`) without fallback `default` statements?
+- [ ] **Pragmatic Use Cases**: Are use cases reserved for meaningful domain workflows, validations, or multi-repository orchestrations, while avoiding redundant pass-through wrappers for trivial CRUD?
+- [ ] **Explicit Composition Root**: Are dependencies injected via constructors and assembled at the application bootstrap boundary (`main.dart` or DI container) rather than instantiated inside consumers?
+- [ ] **Isolated Test Suites**: Can the complete domain layer test suite execute in under two seconds on standard Dart VM bindings without initializing the Flutter engine?
+- [ ] **Resilient Offline Architecture**: If local persistence is required, does the repository encapsulate cache retrieval and synchronization policies without leaking storage choices to the domain?
 
-### Presentation validation
+---
 
-Examples:
+## Conclusion
 
-* field is visually required
-* input format feedback
-* disabling a submit button while text is empty
+Clean Architecture is not a rigid template or a dogmatic set of directories. It is a set of boundaries that allows an engineering team to manage growth, change, and uncertainty.
 
-### Domain validation
-
-Examples:
-
-* an order cannot contain a negative quantity
-* a user cannot perform an operation without a required permission
-* a business rule prevents an invalid state
-
-### Data validation
-
-Examples:
-
-* API response is malformed
-* required response field is missing
-* local data cannot be decoded
-
-Separating these responsibilities prevents a widget from becoming responsible for every type of validation in the application.
-
-## A Practical Example: Loading a Profile
-
-Consider a profile screen.
-
-The complete flow might be:
-
-```text
-ProfilePage
-     ↓
-ProfileController
-     ↓
-GetProfile
-     ↓
-ProfileRepository
-     ↑
-ProfileRepositoryImpl
-     ↓
-ProfileRemoteDataSource
-     ↓
-HTTP client
-     ↓
-API
-```
-
-Each component has a different responsibility.
-
-### `ProfilePage`
-
-Displays:
-
-* loading state
-* profile data
-* error state
-
-### `ProfileController`
-
-Manages presentation state.
-
-### `GetProfile`
-
-Represents the application operation.
-
-### `ProfileRepository`
-
-Defines the data requirement.
-
-### `ProfileRepositoryImpl`
-
-Coordinates data sources.
-
-### `ProfileRemoteDataSource`
-
-Handles the API.
-
-### HTTP client
-
-Handles network communication.
-
-This division means a change to the HTTP client does not require changing the profile screen.
-
-## A Practical Example: Submitting an Order
-
-An order workflow can demonstrate why the boundaries become valuable.
-
-Imagine:
-
-```text
-User presses "Place Order"
-        ↓
-Presentation controller
-        ↓
-SubmitOrder
-        ↓
-Validate order
-        ↓
-Check inventory
-        ↓
-Calculate final amount
-        ↓
-Process payment
-        ↓
-Create order
-        ↓
-Return result
-        ↓
-Presentation state
-        ↓
-Show success/error
-```
-
-The UI does not need to know how inventory is checked or how payment is processed.
-
-That behavior can be tested independently.
-
-If the payment provider changes, the presentation layer does not need to change.
-
-If the UI changes from one screen to another, the underlying order rules can remain intact.
-
-This is the practical value of architectural boundaries.
-
-## How to Migrate an Existing Flutter Application
-
-A common mistake is deciding to adopt Clean Architecture and immediately rewriting the entire application.
-
-For a production application, that can create unnecessary risk.
-
-A safer migration is incremental.
-
-### Step 1: Choose One Feature
-
-Pick a feature with meaningful complexity.
-
-Avoid starting with a trivial screen that cannot demonstrate the value of the architecture.
-
-### Step 2: Map Current Responsibilities
-
-Identify where the feature currently handles:
-
-* UI
-* state
-* business logic
-* API calls
-* persistence
-* external services
-
-### Step 3: Establish a Data Boundary
-
-Move infrastructure-specific operations behind a repository or appropriate data abstraction.
-
-### Step 4: Extract Business Rules
-
-Move important business decisions out of widgets and presentation classes.
-
-### Step 5: Introduce Domain Contracts
-
-Define interfaces only where the application needs a meaningful boundary.
-
-### Step 6: Add Focused Tests
-
-Test extracted business behavior independently.
-
-### Step 7: Repeat Gradually
-
-Use lessons from the first feature before applying the same structure everywhere.
-
-This approach allows the architecture to evolve based on real problems.
-
-## A Useful Definition of "Done"
-
-A project is not architecturally healthy because it contains:
-
-```text
-data/
-domain/
-presentation/
-```
-
-The more useful test is whether developers can answer practical questions quickly.
-
-Where does this business rule belong?
-
-Where should this API request be implemented?
-
-How can this behavior be tested without Flutter?
-
-Where should caching live?
-
-What happens when the backend changes?
-
-Which layer owns this decision?
-
-Can this data source be replaced without rewriting the UI?
-
-Can a developer understand this feature without navigating through unrelated parts of the application?
-
-If the answers are clear, the architecture is doing its job.
-
-## Common Mistakes to Avoid
-
-### Copying a large-project architecture into a small application
-
-Architecture should match the complexity of the product.
-
-### Putting business logic into state-management classes
-
-Controllers and Blocs should not become the entire application layer.
-
-### Making the domain depend on Flutter
-
-Core application rules become harder to test and reuse when they depend on presentation frameworks.
-
-### Exposing API models throughout the application
-
-External contracts should not automatically become internal application contracts.
-
-### Creating meaningless repository wrappers
-
-A repository should provide a useful data boundary rather than simply forward every method call.
-
-### Creating interfaces without a purpose
-
-Abstraction has a maintenance cost.
-
-### Creating use cases for trivial operations
-
-Use cases should represent meaningful application behavior.
-
-### Making every feature structurally identical
-
-Different features have different complexity.
-
-### Treating architecture as a performance solution
-
-Performance requires its own engineering practices.
-
-### Rewriting everything at once
-
-Incremental architectural improvement is usually safer for an existing production application.
-
-## When a Simpler Architecture Is Better
-
-There is nothing wrong with not using full Clean Architecture.
-
-A small application may be better served by:
-
-```text
-Presentation
-     ↓
-Service
-     ↓
-Data source
-```
-
-A medium-sized application may need:
-
-```text
-Presentation
-     ↓
-Application
-     ↓
-Repository
-     ↓
-Data
-```
-
-A complex application may justify:
-
-```text
-Presentation
-     ↓
-Use cases
-     ↓
-Domain
-     ↑
-Repositories
-     ↑
-Data implementations
-     ↓
-Remote/local infrastructure
-```
-
-There is no architectural prize for choosing the most complicated diagram.
-
-The best architecture is the one that gives the team enough structure to control complexity without creating more complexity than it removes.
-
-## Final Perspective
-
-Clean Architecture is best understood as a way of managing change.
-
-Flutter gives developers powerful tools for building interfaces, but a production application eventually has to deal with much more than screens and widgets.
-
-Business rules evolve.
-
-APIs change.
-
-Storage strategies change.
-
-Features interact.
-
-Teams grow.
-
-Testing requirements increase.
-
-Infrastructure gets replaced.
-
-A well-designed architecture gives those changes somewhere sensible to go.
-
-The presentation layer can evolve without owning business rules. The domain can express important application behavior without knowing which HTTP client or database is being used. Repositories can protect the application from infrastructure changes. Data models can isolate external representations. Dependency injection can make components easier to replace and test.
-
-At the same time, Clean Architecture should remain a tool rather than a doctrine.
-
-A small Flutter application does not need dozens of abstractions simply because a larger application uses them. A repository should exist because it provides a useful boundary. A use case should exist because it represents meaningful behavior. A separate entity should exist when it protects the application's model from another representation.
-
-The objective is ultimately simple:
-
-> **Keep the important parts of the application understandable, testable, and safe to change as the product grows.**
-
-When Clean Architecture helps achieve that objective, it becomes a practical engineering discipline rather than just another project structure.
+By enforcing the Dependency Rule, isolating volatile external schemas behind DTO mappers, adopting functional error handling with Dart 3 sealed types, and keeping the domain pure, your Flutter application remains resilient. As backend APIs evolve, state management tooling shifts, or product requirements expand, the core business rules of your application remain stable, verifiable, and maintainable.

@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MDXRemote } from "next-mdx-remote/rsc";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 import { Section } from "@/components/layout/section";
 import { SiteShell } from "@/components/layout/site-shell";
 import { BlogArchivePage } from "@/components/blog/archive-page";
@@ -175,6 +177,13 @@ function CategoryArchivePage({
   );
 }
 
+const mdxRemoteOptions = {
+  mdxOptions: {
+    remarkPlugins: [remarkMath],
+    rehypePlugins: [rehypeKatex],
+  },
+};
+
 function ArticlePage({ slug }: { slug: string }) {
   const post = getBlogPost(slug);
 
@@ -266,7 +275,11 @@ function ArticlePage({ slug }: { slug: string }) {
         <Section className="mx-auto max-w-3xl py-10 md:py-14">
           <div className="reveal rounded-lg border border-slate-200 bg-white p-7 shadow-[0_18px_54px_rgba(15,23,42,0.06)] md:p-10">
             <div className="blog-prose">
-              <MDXRemote source={post.content} components={blogMdxComponents} />
+              <MDXRemote
+                source={post.content}
+                components={blogMdxComponents}
+                options={mdxRemoteOptions}
+              />
             </div>
             {hasAdSlot(adSlots.blogInArticle) ? (
               <InArticleAd
